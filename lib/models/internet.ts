@@ -1,12 +1,10 @@
 export interface InternetProduct {
-  id: string;
-  key: string;
+  key: string; // Now primary key
   name: string;
   download_speed: number;
   upload_speed: number;
   technology: ("coax" | "Fiber G" | "Fiber P")[];
   snapshotId?: string;
-  // marketIds removed, as it's now a many-to-many relationship
   idealFor: string;
   promoBanner?: string;
   promoMonths?: number;
@@ -14,6 +12,6 @@ export interface InternetProduct {
     text: string;
     color: string;
   };
-  // New property to represent the many-to-many relationship when needed in code
+  // Many-to-many relationship property
   markets?: string[];
 }

@@ -1,6 +1,5 @@
 export interface Market {
-  id: string;
-  key: string;
+  key: string; // Now primary key
   label: string;
   code: string;
   active: boolean;

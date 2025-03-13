@@ -22,25 +22,22 @@ async function migrate() {
     await sql`DROP TABLE IF EXISTS markets CASCADE`;
     console.log('✓ Existing tables dropped');
 
-    // Create markets table
+    // Create markets table - use key as primary key instead of id
     await sql`
       CREATE TABLE IF NOT EXISTS markets (
-        id TEXT PRIMARY KEY,
-        key TEXT,
+        key TEXT PRIMARY KEY,
         label TEXT NOT NULL,
         code TEXT NOT NULL UNIQUE,
         active BOOLEAN NOT NULL DEFAULT true,
-        snapshot_id TEXT,
-        product_keys TEXT[]
+        snapshot_id TEXT
       )
     `;
     console.log('✓ Markets table created');
 
-    // Create internet_products table - remove the market_ids field
+    // Create internet_products table - use key as primary key instead of id
     await sql`
       CREATE TABLE IF NOT EXISTS internet_products (
-        id TEXT PRIMARY KEY,
-        key TEXT NOT NULL UNIQUE,
+        key TEXT PRIMARY KEY,
         name TEXT NOT NULL,
         download_speed INTEGER NOT NULL,
         upload_speed INTEGER NOT NULL,
@@ -55,19 +52,19 @@ async function migrate() {
     `;
     console.log('✓ Internet products table created');
 
-    // Create market_internet_product join table
+    // Create market_internet_product join table - use key fields for foreign keys
     await sql`
       CREATE TABLE IF NOT EXISTS market_internet_product (
-        market_id TEXT NOT NULL,
-        internet_product_id TEXT NOT NULL,
-        PRIMARY KEY (market_id, internet_product_id),
-        FOREIGN KEY (market_id) REFERENCES markets(id) ON DELETE CASCADE,
-        FOREIGN KEY (internet_product_id) REFERENCES internet_products(id) ON DELETE CASCADE
+        market_key TEXT NOT NULL,
+        internet_product_key TEXT NOT NULL,
+        PRIMARY KEY (market_key, internet_product_key),
+        FOREIGN KEY (market_key) REFERENCES markets(key) ON DELETE CASCADE,
+        FOREIGN KEY (internet_product_key) REFERENCES internet_products(key) ON DELETE CASCADE
       )
     `;
     console.log('✓ Market-Internet Product join table created');
 
-    // Create channels table
+    // Create channels table - keep id as primary key since no changes needed
     await sql`
       CREATE TABLE IF NOT EXISTS channels (
         id TEXT PRIMARY KEY,
@@ -83,10 +80,10 @@ async function migrate() {
     `;
     console.log('✓ Channels table created');
 
-    // Create tv_products table - remove the market_ids field
+    // Create tv_products table - use key as primary key instead of id
     await sql`
       CREATE TABLE IF NOT EXISTS tv_products (
-        id TEXT PRIMARY KEY,
+        key TEXT PRIMARY KEY,
         name TEXT NOT NULL,
         type TEXT NOT NULL,
         channels TEXT[],
@@ -98,22 +95,22 @@ async function migrate() {
     `;
     console.log('✓ TV products table created');
 
-    // Create market_tv_product join table
+    // Create market_tv_product join table - use key fields for foreign keys
     await sql`
       CREATE TABLE IF NOT EXISTS market_tv_product (
-        market_id TEXT NOT NULL,
-        tv_product_id TEXT NOT NULL,
-        PRIMARY KEY (market_id, tv_product_id),
-        FOREIGN KEY (market_id) REFERENCES markets(id) ON DELETE CASCADE,
-        FOREIGN KEY (tv_product_id) REFERENCES tv_products(id) ON DELETE CASCADE
+        market_key TEXT NOT NULL,
+        tv_product_key TEXT NOT NULL,
+        PRIMARY KEY (market_key, tv_product_key),
+        FOREIGN KEY (market_key) REFERENCES markets(key) ON DELETE CASCADE,
+        FOREIGN KEY (tv_product_key) REFERENCES tv_products(key) ON DELETE CASCADE
       )
     `;
     console.log('✓ Market-TV Product join table created');
 
-    // Create voice_products table - remove the market_ids field
+    // Create voice_products table - use key as primary key instead of id
     await sql`
       CREATE TABLE IF NOT EXISTS voice_products (
-        id TEXT PRIMARY KEY,
+        key TEXT PRIMARY KEY,
         name TEXT NOT NULL,
         type TEXT NOT NULL,
         features TEXT[],
@@ -124,14 +121,14 @@ async function migrate() {
     `;
     console.log('✓ Voice products table created');
 
-    // Create market_voice_product join table
+    // Create market_voice_product join table - use key fields for foreign keys
     await sql`
       CREATE TABLE IF NOT EXISTS market_voice_product (
-        market_id TEXT NOT NULL,
-        voice_product_id TEXT NOT NULL,
-        PRIMARY KEY (market_id, voice_product_id),
-        FOREIGN KEY (market_id) REFERENCES markets(id) ON DELETE CASCADE,
-        FOREIGN KEY (voice_product_id) REFERENCES voice_products(id) ON DELETE CASCADE
+        market_key TEXT NOT NULL,
+        voice_product_key TEXT NOT NULL,
+        PRIMARY KEY (market_key, voice_product_key),
+        FOREIGN KEY (market_key) REFERENCES markets(key) ON DELETE CASCADE,
+        FOREIGN KEY (voice_product_key) REFERENCES voice_products(key) ON DELETE CASCADE
       )
     `;
     console.log('✓ Market-Voice Product join table created');
@@ -139,12 +136,12 @@ async function migrate() {
     // Create equipment table
     await sql`
       CREATE TABLE IF NOT EXISTS equipment (
-        id TEXT PRIMARY KEY,
+        key TEXT PRIMARY KEY,
         name TEXT NOT NULL,
         type TEXT NOT NULL,
         features TEXT[],
         compatibility JSONB,
-        market_ids TEXT[],
+        market_keys TEXT[],
         monthly_price DECIMAL(10,2) NOT NULL,
         promo_banner TEXT,
         promo_months INTEGER
@@ -155,8 +152,7 @@ async function migrate() {
     // Create promotions table
     await sql`
       CREATE TABLE IF NOT EXISTS promotions (
-        id TEXT PRIMARY KEY,
-        key TEXT NOT NULL,
+        key TEXT PRIMARY KEY,
         name TEXT NOT NULL,
         start_date TIMESTAMPTZ NOT NULL,
         end_date TIMESTAMPTZ NOT NULL,

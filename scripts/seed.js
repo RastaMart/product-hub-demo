@@ -11,40 +11,39 @@ const productsData = JSON.parse(
 );
 
 const markets = [
-  { id: '1', label: 'Ohio Fiber Equal Speed', code: '1001', active: true, key: 'ohio-fiber-equal-speed' },
-  { id: '2', label: 'Florida Fiber', code: '1002', active: true, key: 'florida-fiber' },
-  { id: '3', label: 'South Carolina Fiber', code: '1003', active: true, key: 'fragile-fiber-sc' },
-  { id: '4', label: 'Competitive Fiber', code: '1004', active: false, key: 'fiber-competitive' },
-  { id: '5', label: 'West Virginia Prime Fiber', code: '1005', active: true, key: 'prime-fiber-wv' },
-  { id: '6', label: 'Maryland/Delaware Fiber', code: '1006', active: true, key: 'fragile-fiber-md-de' },
-  { id: '7', label: 'Standard Fiber', code: '1007', active: true, key: 'fiber' },
-  { id: '8', label: 'Maryland Equal Speed Fiber', code: '1008', active: false, key: 'fragile-fiber-equal-speed-md' },
-  { id: '9', label: 'Equal Speed Fiber', code: '1009', active: true, key: 'fiber-equal-speed' },
-  { id: '10', label: 'Connecticut Equal Speed Fiber', code: '1010', active: true, key: 'fragile-fiber-equal-speed-ct' },
-  { id: '11', label: 'Florida Equal Speed Fiber', code: '1011', active: true, key: 'florida-fiber-equal-speed' },
-  { id: '12', label: 'Competitive Equal Speed Fiber', code: '1012', active: true, key: 'fiber-competitive-equal-speed' },
-  { id: '13', label: 'Ohio', code: '1013', active: false, key: 'ohio' },
-  { id: '14', label: 'West Virginia Prime', code: '1014', active: true, key: 'prime-wv' },
-  { id: '15', label: 'Maryland/Delaware', code: '1015', active: true, key: 'fragile-md-de' },
-  { id: '16', label: 'Standard', code: '1016', active: true, key: 'default' },
-  { id: '17', label: 'Maryland Limited', code: '1017', active: true, key: 'fragile-limited-md' },
-  { id: '18', label: 'Limited', code: '1018', active: false, key: 'limited' },
-  { id: '19', label: 'Connecticut', code: '1019', active: true, key: 'fragile-ct' },
-  { id: '20', label: 'Florida Coax', code: '1020', active: true, key: 'florida-coax' },
-  { id: '21', label: 'Western PA', code: '1021', active: true, key: 'fragile-wpa' },
-  { id: '22', label: 'South Carolina', code: '1022', active: true, key: 'fragile-sc' },
-  { id: '23', label: 'Competitive', code: '1023', active: false, key: 'competitive' }
+  { label: 'Ohio Fiber Equal Speed', code: '1001', active: true, key: 'ohio-fiber-equal-speed' },
+  { label: 'Florida Fiber', code: '1002', active: true, key: 'florida-fiber' },
+  { label: 'South Carolina Fiber', code: '1003', active: true, key: 'fragile-fiber-sc' },
+  { label: 'Competitive Fiber', code: '1004', active: false, key: 'fiber-competitive' },
+  { label: 'West Virginia Prime Fiber', code: '1005', active: true, key: 'prime-fiber-wv' },
+  { label: 'Maryland/Delaware Fiber', code: '1006', active: true, key: 'fragile-fiber-md-de' },
+  { label: 'Standard Fiber', code: '1007', active: true, key: 'fiber' },
+  { label: 'Maryland Equal Speed Fiber', code: '1008', active: false, key: 'fragile-fiber-equal-speed-md' },
+  { label: 'Equal Speed Fiber', code: '1009', active: true, key: 'fiber-equal-speed' },
+  { label: 'Connecticut Equal Speed Fiber', code: '1010', active: true, key: 'fragile-fiber-equal-speed-ct' },
+  { label: 'Florida Equal Speed Fiber', code: '1011', active: true, key: 'florida-fiber-equal-speed' },
+  { label: 'Competitive Equal Speed Fiber', code: '1012', active: true, key: 'fiber-competitive-equal-speed' },
+  { label: 'Ohio', code: '1013', active: false, key: 'ohio' },
+  { label: 'West Virginia Prime', code: '1014', active: true, key: 'prime-wv' },
+  { label: 'Maryland/Delaware', code: '1015', active: true, key: 'fragile-md-de' },
+  { label: 'Standard', code: '1016', active: true, key: 'default' },
+  { label: 'Maryland Limited', code: '1017', active: true, key: 'fragile-limited-md' },
+  { label: 'Limited', code: '1018', active: false, key: 'limited' },
+  { label: 'Connecticut', code: '1019', active: true, key: 'fragile-ct' },
+  { label: 'Florida Coax', code: '1020', active: true, key: 'florida-coax' },
+  { label: 'Western PA', code: '1021', active: true, key: 'fragile-wpa' },
+  { label: 'South Carolina', code: '1022', active: true, key: 'fragile-sc' },
+  { label: 'Competitive', code: '1023', active: false, key: 'competitive' }
 ];
 
 const internetProducts = [
   {
-    id: '1',
     key: 'P100',
     name: 'Basic Internet',
     download_speed: 100,
     upload_speed: 10,
     technology: ['coax'],
-    market_ids: ['1', '2', '3'],
+    market_keys: ['ohio-fiber-equal-speed', 'florida-fiber', 'fragile-fiber-sc'],
     ideal_for: 'Up to 3 devices',
     promo_banner: 'Free Equipment and Wifi Your Way For 12 Months',
     promo_months: 12,
@@ -52,13 +51,12 @@ const internetProducts = [
     banner_color: 'salmon'
   },
   {
-    id: '2',
     key: 'P200',
     name: 'Fast Internet',
     download_speed: 200,
     upload_speed: 20,
     technology: ['coax', 'Fiber G'],
-    market_ids: ['1', '2', '4'],
+    market_keys: ['ohio-fiber-equal-speed', 'florida-fiber', 'fiber-competitive'],
     ideal_for: 'Up to 5 devices',
     promo_banner: 'Free Installation',
     promo_months: 6,
@@ -66,13 +64,12 @@ const internetProducts = [
     banner_color: 'blue'
   },
   {
-    id: '3',
     key: 'P400',
     name: 'Ultra Internet',
     download_speed: 500,
     upload_speed: 50,
     technology: ['Fiber G'],
-    market_ids: ['2', '3', '4'],
+    market_keys: ['florida-fiber', 'fragile-fiber-sc', 'fiber-competitive'],
     ideal_for: 'Up to 8 devices',
     promo_banner: 'First Month Free',
     promo_months: 1,
@@ -80,13 +77,12 @@ const internetProducts = [
     banner_color: 'purple'
   },
   {
-    id: '4',
     key: 'P1GB',
     name: 'Gigabit Pro',
     download_speed: 1000,
     upload_speed: 1000,
     technology: ['Fiber P'],
-    market_ids: ['1', '3', '4'],
+    market_keys: ['ohio-fiber-equal-speed', 'fragile-fiber-sc', 'fiber-competitive'],
     ideal_for: 'Up to 12+ devices',
     promo_banner: 'Free Professional Installation',
     promo_months: 3,
@@ -125,7 +121,6 @@ const uiElements = [
 
 const promotions = [
   {
-    id: '1',
     key: "2MF-2025",
     name: '2MF 1Gig',
     start_date: '2025-02-01T00:00:00Z',
@@ -139,8 +134,7 @@ const promotions = [
     products: [
       {
 					promokey: "2MF-2025",
-        product_id: 4,
-        productKey: 'P1GB',
+        product_key: 'P1GB',
 					productName: "Fiber GigaFast",
 					ui_elements: [
 						{
@@ -166,7 +160,7 @@ const promotions = [
 					]
 				}
     ],
-    markets: ['1', '2', '3'],
+    markets: ['ohio-fiber-equal-speed', 'florida-fiber', 'fragile-fiber-sc'],
     ui_elements: [
 				{
 					key: "internetPage_banner",
@@ -177,7 +171,6 @@ const promotions = [
     ]
   },
   {
-    id: '2',
 		key: "1MF-sitewide",
     name: '1MF 500Mb and 1Gig',
     start_date: '2024-06-01T00:00:00Z',
@@ -189,8 +182,7 @@ const promotions = [
     ],
     products: [
       {
-        product_id: 4,
-        productKey: 'P1GB',
+        product_key: 'P1GB',
         ui_elements: [
 						{
 						key: "package_header",
@@ -215,8 +207,7 @@ const promotions = [
         ]
       },
       {
-        product_id: 3,
-        productKey: 'P400',
+        product_key: 'P400',
         ui_elements: [
 						{
 						key: "package_header",
@@ -241,7 +232,7 @@ const promotions = [
         ]
       }
     ],
-    markets: ['1', '4'],
+    markets: ['ohio-fiber-equal-speed', 'fiber-competitive'],
     ui_elements: [
       {
         key: 'package-card-top-banner',
@@ -253,87 +244,35 @@ const promotions = [
   }
 ];
 
-// Extract unique TV products from products.json
-const uniqueTvProducts = new Map();
-productsData.forEach(product => {
-  product.variants.forEach(variant => {
-    const tvProducts = variant.customizations.tv?.products || {};
-    Object.values(tvProducts).forEach(tvProduct => {
-      if (tvProduct.name && !uniqueTvProducts.has(tvProduct.name)) {
-        uniqueTvProducts.set(tvProduct.name, {
-          id: String(uniqueTvProducts.size + 1),
-          name: tvProduct.name,
-          type: tvProduct.name.toLowerCase().includes('stream') ? 'Stream' : 'Cable',
-          channels: [],
-          features: [],
-          promo_banner: tvProduct.promoBanner || null,
-          promo_months: tvProduct.promoMonths ? parseInt(tvProduct.promoMonths, 10) : null,
-          monthly_price: 59.99 // Default price since it's not in the JSON
-        });
-      }
-    });
-  });
-});
+const tvProducts = [
+  {
+    key: 'Stream TV Box'.toLowerCase(),
+    name: 'Stream TV Box',
+    type: 'Stream',
+    channels: [],
+    features: [],
+    promo_banner: null,
+    promo_months: null,
+    monthly_price: 59.99
+  }
+];
 
-// Convert Map to Array for TV products
-const tvProducts = Array.from(uniqueTvProducts.values());
-
-// Extract unique Voice products from products.json
-const uniqueVoiceProducts = new Map();
-productsData.forEach(product => {
-  product.variants.forEach(variant => {
-    const voiceProducts = variant.customizations.voice?.products || {};
-    Object.values(voiceProducts).forEach(voiceProduct => {
-      if (voiceProduct.name && !uniqueVoiceProducts.has(voiceProduct.name)) {
-        uniqueVoiceProducts.set(voiceProduct.name, {
-          id: String(uniqueVoiceProducts.size + 1),
-          name: voiceProduct.name,
-          type: voiceProduct.name.toLowerCase().includes('unlimited') ? 'VoIP' : 'Landline',
-          features: ['Caller ID', 'Call Waiting', 'Voicemail'],
-          promo_banner: voiceProduct.promoBanner || null,
-          promo_months: voiceProduct.promoMonths ? parseInt(voiceProduct.promoMonths, 10) : null,
-          monthly_price: 29.99 // Default price since it's not in the JSON
-        });
-      }
-    });
-  });
-});
-
-// Convert Map to Array for Voice products
-const voiceProducts = Array.from(uniqueVoiceProducts.values());
-
-// Extract unique Internet products from products.json
-const uniqueInternetProducts = new Map();
-productsData.forEach(product => {
-  product.variants.forEach(variant => {
-    const internetProducts = variant.customizations.internet?.products || {};
-    Object.values(internetProducts).forEach(internetProduct => {
-      if (internetProduct.name && !uniqueInternetProducts.has(internetProduct.name)) {
-        uniqueInternetProducts.set(internetProduct.name, {
-          id: String(uniqueInternetProducts.size + 1),
-          key: internetProduct.name.replace(/\s+/g, '').toUpperCase(),
-          name: internetProduct.name,
-          download_speed: parseInt(internetProduct.download || '100', 10),
-          upload_speed: parseInt(internetProduct.upload || '10', 10),
-          technology: internetProduct.name.toLowerCase().includes('fiber') ? ['Fiber G'] : ['coax'],
-          ideal_for: internetProduct.idealFor || `Up to ${Math.floor(parseInt(internetProduct.download || '100', 10) / 50) + 2} devices`,
-          promo_banner: internetProduct.promoBanner || null,
-          promo_months: internetProduct.promoMonths ? parseInt(internetProduct.promoMonths, 10) : null,
-          banner_text: internetProduct.banner?.price || 'Best Value',
-          banner_color: 'blue'
-        });
-      }
-    });
-  });
-});
-
-// Convert Map to Array for Internet products
-const internetProductsFromJson = Array.from(uniqueInternetProducts.values());
+const voiceProducts = [
+  {
+    key: 'Unlimited Voice Service'.toLowerCase(),
+    name: 'Unlimited Voice Service',
+    type: 'VoIP',
+    features: [ 'Caller ID', 'Call Waiting', 'Voicemail' ],
+    promo_banner: null,
+    promo_months: null,
+    monthly_price: 29.99
+  }
+];
 
 // Generate market-product relations based on audienceValue to key mapping
 const marketAudienceMapping = {};
 markets.forEach(market => {
-  marketAudienceMapping[market.key] = market.id;
+  marketAudienceMapping[market.key] = market.key;
 });
 
 // Generate market-TV product relationships
@@ -341,14 +280,14 @@ const marketTvProducts = [];
 productsData.forEach(product => {
   product.variants.forEach(variant => {
     if (variant.audienceType === 'marketType' && variant.audienceValue && marketAudienceMapping[variant.audienceValue]) {
-      const marketId = marketAudienceMapping[variant.audienceValue];
+      const marketKey = marketAudienceMapping[variant.audienceValue];
       const tvProductsInVariant = variant.customizations.tv?.products || {};
       Object.values(tvProductsInVariant).forEach(tvProduct => {
-        const tvProductObj = Array.from(uniqueTvProducts.values()).find(p => p.name === tvProduct.name);
+        const tvProductObj = Array.from(tvProducts.values()).find(p => p.name === tvProduct.name);
         if (tvProductObj) {
           marketTvProducts.push({
-            market_id: marketId,
-            tv_product_id: tvProductObj.id
+            market_key: marketKey,
+            tv_product_key: tvProductObj.key
           });
         }
       });
@@ -360,74 +299,74 @@ productsData.forEach(product => {
 const uniqueMarketTvProducts = [];
 const tvRelationSet = new Set();
 marketTvProducts.forEach(relation => {
-  const key = `${relation.market_id}-${relation.tv_product_id}`;
+  const key = `${relation.market_key}-${relation.tv_product_key}`;
   if (!tvRelationSet.has(key)) {
     tvRelationSet.add(key);
     uniqueMarketTvProducts.push(relation);
   }
 });
 
-// Generate market-Voice product relationships
-const marketVoiceProducts = [];
-productsData.forEach(product => {
-  product.variants.forEach(variant => {
-    if (variant.audienceType === 'marketType' && variant.audienceValue && marketAudienceMapping[variant.audienceValue]) {
-      const marketId = marketAudienceMapping[variant.audienceValue];
-      const voiceProductsInVariant = variant.customizations.voice?.products || {};
-      Object.values(voiceProductsInVariant).forEach(voiceProduct => {
-        const voiceProductObj = Array.from(uniqueVoiceProducts.values()).find(p => p.name === voiceProduct.name);
-        if (voiceProductObj) {
-          marketVoiceProducts.push({
-            market_id: marketId,
-            voice_product_id: voiceProductObj.id
-          });
-        }
-      });
-    }
-  });
-});
+// // Generate market-Voice product relationships
+// const marketVoiceProducts = [];
+// productsData.forEach(product => {
+//   product.variants.forEach(variant => {
+//     if (variant.audienceType === 'marketType' && variant.audienceValue && marketAudienceMapping[variant.audienceValue]) {
+//       const marketId = marketAudienceMapping[variant.audienceValue];
+//       const voiceProductsInVariant = variant.customizations.voice?.products || {};
+//       Object.values(voiceProductsInVariant).forEach(voiceProduct => {
+//         const voiceProductObj = Array.from(voiceProduct.values()).find(p => p.name === voiceProduct.name);
+//         if (voiceProductObj) {
+//           marketVoiceProducts.push({
+//             market_key: marketId,
+//             voice_product_key: voiceProductObj.id
+//           });
+//         }
+//       });
+//     }
+//   });
+// });
 
-// Remove duplicates from marketVoiceProducts
-const uniqueMarketVoiceProducts = [];
-const voiceRelationSet = new Set();
-marketVoiceProducts.forEach(relation => {
-  const key = `${relation.market_id}-${relation.voice_product_id}`;
-  if (!voiceRelationSet.has(key)) {
-    voiceRelationSet.add(key);
-    uniqueMarketVoiceProducts.push(relation);
-  }
-});
+// // Remove duplicates from marketVoiceProducts
+// const uniqueMarketVoiceProducts = [];
+// const voiceRelationSet = new Set();
+// marketVoiceProducts.forEach(relation => {
+//   const key = `${relation.market_key}-${relation.voice_product_key}`;
+//   if (!voiceRelationSet.has(key)) {
+//     voiceRelationSet.add(key);
+//     uniqueMarketVoiceProducts.push(relation);
+//   }
+// });
 
-// Generate market-internet product relationships based on products.json
-const marketInternetProducts = [];
-productsData.forEach(product => {
-  product.variants.forEach(variant => {
-    if (variant.audienceType === 'marketType' && variant.audienceValue && marketAudienceMapping[variant.audienceValue]) {
-      const marketId = marketAudienceMapping[variant.audienceValue];
-      const internetProductsInVariant = variant.customizations.internet?.products || {};
-      Object.values(internetProductsInVariant).forEach(internetProduct => {
-        const internetProductObj = Array.from(uniqueInternetProducts.values()).find(p => p.name === internetProduct.name);
-        if (internetProductObj) {
-          marketInternetProducts.push({
-            market_id: marketId,
-            internet_product_id: internetProductObj.id
-          });
-        }
-      });
-    }
-  });
-});
+// // Generate market-internet product relationships based on products.json
+// const marketInternetProducts = [];
+// productsData.forEach(product => {
+//   product.variants.forEach(variant => {
+//     if (variant.audienceType === 'marketType' && variant.audienceValue && marketAudienceMapping[variant.audienceValue]) {
+//       const marketId = marketAudienceMapping[variant.audienceValue];
+//       const internetProductsInVariant = variant.customizations.internet?.products || {};
+//       Object.values(internetProductsInVariant).forEach(internetProduct => {
+//         const internetProductObj = Array.from(uniqueInternetProducts.values()).find(p => p.name === internetProduct.name);
+//         if (internetProductObj) {
+//           marketInternetProducts.push({
+//             market_key: marketId,
+//             internet_product_key: internetProductObj.id
+//           });
+//         }
+//       });
+//     }
+//   });
+// });
 
-// Remove duplicates from marketInternetProducts
-const uniqueMarketInternetProducts = [];
-const internetRelationSet = new Set();
-marketInternetProducts.forEach(relation => {
-  const key = `${relation.market_id}-${relation.internet_product_id}`;
-  if (!internetRelationSet.has(key)) {
-    internetRelationSet.add(key);
-    uniqueMarketInternetProducts.push(relation);
-  }
-});
+// // Remove duplicates from marketInternetProducts
+// const uniqueMarketInternetProducts = [];
+// const internetRelationSet = new Set();
+// marketInternetProducts.forEach(relation => {
+//   const key = `${relation.market_key}-${relation.internet_product_key}`;
+//   if (!internetRelationSet.has(key)) {
+//     internetRelationSet.add(key);
+//     uniqueMarketInternetProducts.push(relation);
+//   }
+// });
 
 async function seed() {
   try {
@@ -440,24 +379,21 @@ async function seed() {
     // Seed markets
     for (const market of markets) {
       await sql`
-        INSERT INTO markets (id, label, code, active, key)
-        VALUES (${market.id}, ${market.label}, ${market.code}, ${market.active}, ${market.key})
+        INSERT INTO markets (key, label, code, active)
+        VALUES (${market.key}, ${market.label}, ${market.code}, ${market.active})
       `;
     }
     console.log('✓ Markets seeded');
 
-    // Either use the original internetProducts or the ones from JSON
-    const finalInternetProducts = internetProductsFromJson.length > 0 ? internetProductsFromJson : internetProducts;
-
     // Seed internet products
-    for (const product of finalInternetProducts) {
+    for (const product of internetProducts) {
       await sql`
         INSERT INTO internet_products (
-          id, key, name, download_speed, upload_speed, technology,
+          key, name, download_speed, upload_speed, technology,
           ideal_for, promo_banner, promo_months, banner_text, banner_color
         )
         VALUES (
-          ${product.id}, ${product.key}, ${product.name}, ${product.download_speed},
+          ${product.key}, ${product.name}, ${product.download_speed},
           ${product.upload_speed}, ${product.technology},
           ${product.ideal_for}, ${product.promo_banner}, ${product.promo_months},
           ${product.banner_text}, ${product.banner_color}
@@ -466,25 +402,25 @@ async function seed() {
     }
     console.log('✓ Internet products seeded');
 
-    // Seed market-internet product relationships
-    const internetRelations = uniqueMarketInternetProducts.length > 0 ? uniqueMarketInternetProducts : marketInternetProducts;
-    for (const relation of internetRelations) {
-      await sql`
-        INSERT INTO market_internet_product (market_id, internet_product_id)
-        VALUES (${relation.market_id}, ${relation.internet_product_id})
-      `;
-    }
-    console.log('✓ Market-Internet Product relationships seeded');
+    // // Seed market-internet product relationships
+    // const internetRelations = uniqueMarketInternetProducts.length > 0 ? uniqueMarketInternetProducts : marketInternetProducts;
+    // for (const relation of internetRelations) {
+    //   await sql`
+    //     INSERT INTO market_internet_product (market_key, internet_product_key)
+    //     VALUES (${relation.market_key}, ${relation.internet_product_key})
+    //   `;
+    // }
+    // console.log('✓ Market-Internet Product relationships seeded');
 
     // Seed TV products from extracted data
     for (const product of tvProducts) {
       await sql`
         INSERT INTO tv_products (
-          id, name, type, channels, features,
+          key, name, type, channels, features,
           promo_banner, promo_months, monthly_price
         )
         VALUES (
-          ${product.id}, ${product.name}, ${product.type}, ${product.channels},
+          ${product.key}, ${product.name}, ${product.type}, ${product.channels},
           ${product.features}, ${product.promo_banner}, ${product.promo_months},
           ${product.monthly_price}
         )
@@ -495,36 +431,36 @@ async function seed() {
     // Seed market-TV product relationships
     for (const relation of uniqueMarketTvProducts) {
       await sql`
-        INSERT INTO market_tv_product (market_id, tv_product_id)
-        VALUES (${relation.market_id}, ${relation.tv_product_id})
+        INSERT INTO market_tv_product (market_key, tv_product_key)
+        VALUES (${relation.market_key}, ${relation.tv_product_key})
       `;
     }
-    console.log('✓ Market-TV Product relationships seeded');
+    // console.log('✓ Market-TV Product relationships seeded');
 
-    // Seed Voice products from extracted data
-    for (const product of voiceProducts) {
-      await sql`
-        INSERT INTO voice_products (
-          id, name, type, features,
-          promo_banner, promo_months, monthly_price
-        )
-        VALUES (
-          ${product.id}, ${product.name}, ${product.type}, ${product.features},
-          ${product.promo_banner}, ${product.promo_months},
-          ${product.monthly_price}
-        )
-      `;
-    }
-    console.log('✓ Voice products seeded');
+    // // Seed Voice products from extracted data
+    // for (const product of voiceProducts) {
+    //   await sql`
+    //     INSERT INTO voice_products (
+    //       key, name, type, features,
+    //       promo_banner, promo_months, monthly_price
+    //     )
+    //     VALUES (
+    //       ${product.key}, ${product.name}, ${product.type}, ${product.features},
+    //       ${product.promo_banner}, ${product.promo_months},
+    //       ${product.monthly_price}
+    //     )
+    //   `;
+    // }
+    // console.log('✓ Voice products seeded');
 
-    // Seed market-Voice product relationships
-    for (const relation of uniqueMarketVoiceProducts) {
-      await sql`
-        INSERT INTO market_voice_product (market_id, voice_product_id)
-        VALUES (${relation.market_id}, ${relation.voice_product_id})
-      `;
-    }
-    console.log('✓ Market-Voice Product relationships seeded');
+    // // Seed market-Voice product relationships
+    // for (const relation of uniqueMarketVoiceProducts) {
+    //   await sql`
+    //     INSERT INTO market_voice_product (market_key, voice_product_key)
+    //     VALUES (${relation.market_key}, ${relation.voice_product_key})
+    //   `;
+    // }
+    // console.log('✓ Market-Voice Product relationships seeded');
 
     // Seed UI elements
     for (const element of uiElements) {
@@ -539,10 +475,9 @@ async function seed() {
     for (const promotion of promotions) {
       await sql`
         INSERT INTO promotions (
-          id, key, name, start_date, end_date, triggers, products, markets, ui_elements
+          key, name, start_date, end_date, triggers, products, markets, ui_elements
         )
         VALUES (
-          ${promotion.id},
           ${promotion.key},
           ${promotion.name},
           ${promotion.start_date},
