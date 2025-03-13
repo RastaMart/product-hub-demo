@@ -26,16 +26,20 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function EquipmentPage() {
-  const { data: markets = [] } = useData<Market>('/api/markets');
-  const { data: equipment = [], loading } = useData<Equipment>('/api/equipment');
+  const { data: markets = [] } = useData<Market>("/api/markets");
+  const { data: equipment = [], loading } = useData<Equipment>(
+    "/api/products/equipment"
+  );
   const [isOpen, setIsOpen] = useState(false);
   const [isAssociationOpen, setIsAssociationOpen] = useState(false);
-  const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(null);
+  const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(
+    null
+  );
   const [newEquipment, setNewEquipment] = useState<Partial<Equipment>>({
     type: "Router",
     features: [],
     compatibility: {},
-    monthlyPrice: 0
+    monthlyPrice: 0,
   });
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -48,21 +52,16 @@ export default function EquipmentPage() {
       "4x4 MIMO",
       "Remote Management",
       "Parental Controls",
-      "Guest Network"
+      "Guest Network",
     ],
-    Modem: [
-      "DOCSIS 3.1",
-      "Gigabit Ethernet",
-      "IPv6 Support",
-      "QoS Management"
-    ],
+    Modem: ["DOCSIS 3.1", "Gigabit Ethernet", "IPv6 Support", "QoS Management"],
     "TV Box": [
       "4K HDR",
       "Voice Remote",
       "Bluetooth",
       "WiFi 6",
       "DVR Capability",
-      "Smart Home Integration"
+      "Smart Home Integration",
     ],
     Phone: [
       "HD Voice",
@@ -70,8 +69,8 @@ export default function EquipmentPage() {
       "Conference Calling",
       "Power over Ethernet",
       "Call Forwarding",
-      "Voicemail"
-    ]
+      "Voicemail",
+    ],
   };
 
   const handleCreateEquipment = () => {
@@ -85,7 +84,7 @@ export default function EquipmentPage() {
       compatibility: newEquipment.compatibility || {},
       monthlyPrice: newEquipment.monthlyPrice || 0,
       promoBanner: newEquipment.promoBanner,
-      promoMonths: newEquipment.promoMonths
+      promoMonths: newEquipment.promoMonths,
     };
 
     // TODO: Add API call to create equipment
@@ -94,7 +93,7 @@ export default function EquipmentPage() {
       type: "Router",
       features: [],
       compatibility: {},
-      monthlyPrice: 0
+      monthlyPrice: 0,
     });
   };
 
@@ -110,12 +109,12 @@ export default function EquipmentPage() {
   const toggleFeature = (feature: string) => {
     const currentFeatures = newEquipment.features || [];
     const exists = currentFeatures.includes(feature);
-    
+
     setNewEquipment({
       ...newEquipment,
       features: exists
-        ? currentFeatures.filter(f => f !== feature)
-        : [...currentFeatures, feature]
+        ? currentFeatures.filter((f) => f !== feature)
+        : [...currentFeatures, feature],
     });
   };
 
@@ -147,7 +146,7 @@ export default function EquipmentPage() {
               <div className="space-y-2">
                 <label className="text-sm font-medium">Name</label>
                 <Input
-                  value={newEquipment.name || ''}
+                  value={newEquipment.name || ""}
                   onChange={(e) =>
                     setNewEquipment({ ...newEquipment, name: e.target.value })
                   }
@@ -160,9 +159,15 @@ export default function EquipmentPage() {
                   {types.map((type) => (
                     <Button
                       key={type}
-                      variant={newEquipment.type === type ? "default" : "outline"}
-                      onClick={() => setNewEquipment({ ...newEquipment, type, features: [] })}
-                      className={newEquipment.type === type ? "bg-[#1a237e]" : ""}
+                      variant={
+                        newEquipment.type === type ? "default" : "outline"
+                      }
+                      onClick={() =>
+                        setNewEquipment({ ...newEquipment, type, features: [] })
+                      }
+                      className={
+                        newEquipment.type === type ? "bg-[#1a237e]" : ""
+                      }
                     >
                       {type}
                     </Button>
@@ -173,9 +178,12 @@ export default function EquipmentPage() {
                 <label className="text-sm font-medium">Monthly Price ($)</label>
                 <Input
                   type="number"
-                  value={newEquipment.monthlyPrice || ''}
+                  value={newEquipment.monthlyPrice || ""}
                   onChange={(e) =>
-                    setNewEquipment({ ...newEquipment, monthlyPrice: parseFloat(e.target.value) || 0 })
+                    setNewEquipment({
+                      ...newEquipment,
+                      monthlyPrice: parseFloat(e.target.value) || 0,
+                    })
                   }
                   placeholder="9.99"
                   step="0.01"
@@ -192,10 +200,14 @@ export default function EquipmentPage() {
                         onClick={() => toggleFeature(feature)}
                       >
                         <Checkbox
-                          checked={(newEquipment.features || []).includes(feature)}
+                          checked={(newEquipment.features || []).includes(
+                            feature
+                          )}
                           onCheckedChange={() => toggleFeature(feature)}
                         />
-                        <label className="text-sm cursor-pointer">{feature}</label>
+                        <label className="text-sm cursor-pointer">
+                          {feature}
+                        </label>
                       </div>
                     ))}
                   </div>
@@ -204,20 +216,28 @@ export default function EquipmentPage() {
               <div className="space-y-2">
                 <label className="text-sm font-medium">Promo Banner</label>
                 <Input
-                  value={newEquipment.promoBanner || ''}
+                  value={newEquipment.promoBanner || ""}
                   onChange={(e) =>
-                    setNewEquipment({ ...newEquipment, promoBanner: e.target.value })
+                    setNewEquipment({
+                      ...newEquipment,
+                      promoBanner: e.target.value,
+                    })
                   }
                   placeholder="Special offer description"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Promo Duration (months)</label>
+                <label className="text-sm font-medium">
+                  Promo Duration (months)
+                </label>
                 <Input
                   type="number"
-                  value={newEquipment.promoMonths || ''}
+                  value={newEquipment.promoMonths || ""}
                   onChange={(e) =>
-                    setNewEquipment({ ...newEquipment, promoMonths: parseInt(e.target.value) || undefined })
+                    setNewEquipment({
+                      ...newEquipment,
+                      promoMonths: parseInt(e.target.value) || undefined,
+                    })
                   }
                   placeholder="12"
                 />
@@ -292,8 +312,8 @@ export default function EquipmentPage() {
 
         <div className="flex items-center justify-between p-4 border-t">
           <div className="text-sm text-gray-500">
-            Showing {startIndex + 1} to {Math.min(endIndex, equipment.length)} of{" "}
-            {equipment.length} equipment
+            Showing {startIndex + 1} to {Math.min(endIndex, equipment.length)}{" "}
+            of {equipment.length} equipment
           </div>
           <div className="flex gap-2">
             <Button
@@ -333,12 +353,20 @@ export default function EquipmentPage() {
                   <TableRow
                     key={market.id}
                     className="cursor-pointer hover:bg-gray-50"
-                    onClick={() => selectedEquipment && handleMarketAssociation(selectedEquipment, market.id)}
+                    onClick={() =>
+                      selectedEquipment &&
+                      handleMarketAssociation(selectedEquipment, market.id)
+                    }
                   >
                     <TableCell className="h-8 py-0">
                       <Checkbox
-                        checked={selectedEquipment?.marketIds?.includes(market.id)}
-                        onCheckedChange={() => selectedEquipment && handleMarketAssociation(selectedEquipment, market.id)}
+                        checked={selectedEquipment?.marketIds?.includes(
+                          market.id
+                        )}
+                        onCheckedChange={() =>
+                          selectedEquipment &&
+                          handleMarketAssociation(selectedEquipment, market.id)
+                        }
                         onClick={(e) => e.stopPropagation()}
                       />
                     </TableCell>

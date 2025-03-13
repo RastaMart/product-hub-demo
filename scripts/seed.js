@@ -1,14 +1,7 @@
 const { neon } = require('@neondatabase/serverless');
 require('dotenv').config();
-const fs = require('fs');
-const path = require('path');
 
 const sql = neon(process.env.DATABASE_URL);
-
-// Read products data from JSON file
-const productsData = JSON.parse(
-  fs.readFileSync(path.join(__dirname, '..', 'products.json'), 'utf8')
-);
 
 const markets = [
   { label: 'Ohio Fiber Equal Speed', code: '1001', active: true, key: 'ohio-fiber-equal-speed' },
@@ -88,6 +81,32 @@ const internetProducts = [
     promo_months: 3,
     banner_text: 'Ultimate Speed',
     banner_color: 'gold'
+  }
+];
+
+
+const tvProducts = [
+  {
+    key: 'Stream TV Box'.toLowerCase(),
+    name: 'Stream TV Box',
+    type: 'Stream',
+    channels: [],
+    features: [],
+    promo_banner: null,
+    promo_months: null,
+    monthly_price: 59.99
+  }
+];
+
+const voiceProducts = [
+  {
+    key: 'Unlimited Voice Service'.toLowerCase(),
+    name: 'Unlimited Voice Service',
+    type: 'VoIP',
+    features: [ 'Caller ID', 'Call Waiting', 'Voicemail' ],
+    promo_banner: null,
+    promo_months: null,
+    monthly_price: 29.99
   }
 ];
 
@@ -244,67 +263,42 @@ const promotions = [
   }
 ];
 
-const tvProducts = [
-  {
-    key: 'Stream TV Box'.toLowerCase(),
-    name: 'Stream TV Box',
-    type: 'Stream',
-    channels: [],
-    features: [],
-    promo_banner: null,
-    promo_months: null,
-    monthly_price: 59.99
-  }
-];
-
-const voiceProducts = [
-  {
-    key: 'Unlimited Voice Service'.toLowerCase(),
-    name: 'Unlimited Voice Service',
-    type: 'VoIP',
-    features: [ 'Caller ID', 'Call Waiting', 'Voicemail' ],
-    promo_banner: null,
-    promo_months: null,
-    monthly_price: 29.99
-  }
-];
-
 // Generate market-product relations based on audienceValue to key mapping
 const marketAudienceMapping = {};
 markets.forEach(market => {
   marketAudienceMapping[market.key] = market.key;
 });
 
-// Generate market-TV product relationships
-const marketTvProducts = [];
-productsData.forEach(product => {
-  product.variants.forEach(variant => {
-    if (variant.audienceType === 'marketType' && variant.audienceValue && marketAudienceMapping[variant.audienceValue]) {
-      const marketKey = marketAudienceMapping[variant.audienceValue];
-      const tvProductsInVariant = variant.customizations.tv?.products || {};
-      Object.values(tvProductsInVariant).forEach(tvProduct => {
-        const tvProductObj = Array.from(tvProducts.values()).find(p => p.name === tvProduct.name);
-        if (tvProductObj) {
-          marketTvProducts.push({
-            market_key: marketKey,
-            tv_product_key: tvProductObj.key
-          });
-        }
-      });
-    }
-  });
-});
+// // Generate market-TV product relationships
+// const marketTvProducts = [];
+// productsData.forEach(product => {
+//   product.variants.forEach(variant => {
+//     if (variant.audienceType === 'marketType' && variant.audienceValue && marketAudienceMapping[variant.audienceValue]) {
+//       const marketKey = marketAudienceMapping[variant.audienceValue];
+//       const tvProductsInVariant = variant.customizations.tv?.products || {};
+//       Object.values(tvProductsInVariant).forEach(tvProduct => {
+//         const tvProductObj = Array.from(tvProducts.values()).find(p => p.name === tvProduct.name);
+//         if (tvProductObj) {
+//           marketTvProducts.push({
+//             market_key: marketKey,
+//             tv_product_key: tvProductObj.key
+//           });
+//         }
+//       });
+//     }
+//   });
+// });
 
-// Remove duplicates from marketTvProducts
-const uniqueMarketTvProducts = [];
-const tvRelationSet = new Set();
-marketTvProducts.forEach(relation => {
-  const key = `${relation.market_key}-${relation.tv_product_key}`;
-  if (!tvRelationSet.has(key)) {
-    tvRelationSet.add(key);
-    uniqueMarketTvProducts.push(relation);
-  }
-});
+// // Remove duplicates from marketTvProducts
+// const uniqueMarketTvProducts = [];
+// const tvRelationSet = new Set();
+// marketTvProducts.forEach(relation => {
+//   const key = `${relation.market_key}-${relation.tv_product_key}`;
+//   if (!tvRelationSet.has(key)) {
+//     tvRelationSet.add(key);
+//     uniqueMarketTvProducts.push(relation);
+//   }
+// });
 
 // // Generate market-Voice product relationships
 // const marketVoiceProducts = [];
@@ -428,30 +422,30 @@ async function seed() {
     }
     console.log('✓ TV products seeded');
 
-    // Seed market-TV product relationships
-    for (const relation of uniqueMarketTvProducts) {
-      await sql`
-        INSERT INTO market_tv_product (market_key, tv_product_key)
-        VALUES (${relation.market_key}, ${relation.tv_product_key})
-      `;
-    }
-    // console.log('✓ Market-TV Product relationships seeded');
-
-    // // Seed Voice products from extracted data
-    // for (const product of voiceProducts) {
+    // // Seed market-TV product relationships
+    // for (const relation of uniqueMarketTvProducts) {
     //   await sql`
-    //     INSERT INTO voice_products (
-    //       key, name, type, features,
-    //       promo_banner, promo_months, monthly_price
-    //     )
-    //     VALUES (
-    //       ${product.key}, ${product.name}, ${product.type}, ${product.features},
-    //       ${product.promo_banner}, ${product.promo_months},
-    //       ${product.monthly_price}
-    //     )
+    //     INSERT INTO market_tv_product (market_key, tv_product_key)
+    //     VALUES (${relation.market_key}, ${relation.tv_product_key})
     //   `;
     // }
-    // console.log('✓ Voice products seeded');
+    // console.log('✓ Market-TV Product relationships seeded');
+
+    // Seed Voice products from extracted data
+    for (const product of voiceProducts) {
+      await sql`
+        INSERT INTO voice_products (
+          key, name, type, features,
+          promo_banner, promo_months, monthly_price
+        )
+        VALUES (
+          ${product.key}, ${product.name}, ${product.type}, ${product.features},
+          ${product.promo_banner}, ${product.promo_months},
+          ${product.monthly_price}
+        )
+      `;
+    }
+    console.log('✓ Voice products seeded');
 
     // // Seed market-Voice product relationships
     // for (const relation of uniqueMarketVoiceProducts) {

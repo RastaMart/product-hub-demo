@@ -26,16 +26,19 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function TVProductsPage() {
-  const { data: markets = [] } = useData<Market>('/api/markets');
-  const { data: products = [], loading } = useData<TVProduct>('/api/tv');
+  const { data: markets = [] } = useData<Market>("/api/markets");
+  const { data: products = [], loading } =
+    useData<TVProduct>("/api/products/tv");
   const [isOpen, setIsOpen] = useState(false);
   const [isAssociationOpen, setIsAssociationOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<TVProduct | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<TVProduct | null>(
+    null
+  );
   const [newProduct, setNewProduct] = useState<Partial<TVProduct>>({
     type: "Stream",
     channels: [],
     features: [],
-    monthlyPrice: 0
+    monthlyPrice: 0,
   });
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -48,7 +51,7 @@ export default function TVProductsPage() {
     "Premium Channels",
     "Multiple Streams",
     "HD Channels",
-    "4K Content"
+    "4K Content",
   ];
 
   const handleCreateProduct = () => {
@@ -62,7 +65,7 @@ export default function TVProductsPage() {
       features: newProduct.features || [],
       monthlyPrice: newProduct.monthlyPrice || 0,
       promoBanner: newProduct.promoBanner,
-      promoMonths: newProduct.promoMonths
+      promoMonths: newProduct.promoMonths,
     };
 
     // TODO: Add API call to create product
@@ -71,7 +74,7 @@ export default function TVProductsPage() {
       type: "Stream",
       channels: [],
       features: [],
-      monthlyPrice: 0
+      monthlyPrice: 0,
     });
   };
 
@@ -87,12 +90,12 @@ export default function TVProductsPage() {
   const toggleFeature = (feature: string) => {
     const currentFeatures = newProduct.features || [];
     const exists = currentFeatures.includes(feature);
-    
+
     setNewProduct({
       ...newProduct,
       features: exists
-        ? currentFeatures.filter(f => f !== feature)
-        : [...currentFeatures, feature]
+        ? currentFeatures.filter((f) => f !== feature)
+        : [...currentFeatures, feature],
     });
   };
 
@@ -124,7 +127,7 @@ export default function TVProductsPage() {
               <div className="space-y-2">
                 <label className="text-sm font-medium">Name</label>
                 <Input
-                  value={newProduct.name || ''}
+                  value={newProduct.name || ""}
                   onChange={(e) =>
                     setNewProduct({ ...newProduct, name: e.target.value })
                   }
@@ -150,9 +153,12 @@ export default function TVProductsPage() {
                 <label className="text-sm font-medium">Monthly Price ($)</label>
                 <Input
                   type="number"
-                  value={newProduct.monthlyPrice || ''}
+                  value={newProduct.monthlyPrice || ""}
                   onChange={(e) =>
-                    setNewProduct({ ...newProduct, monthlyPrice: parseFloat(e.target.value) || 0 })
+                    setNewProduct({
+                      ...newProduct,
+                      monthlyPrice: parseFloat(e.target.value) || 0,
+                    })
                   }
                   placeholder="29.99"
                   step="0.01"
@@ -171,7 +177,9 @@ export default function TVProductsPage() {
                         checked={(newProduct.features || []).includes(feature)}
                         onCheckedChange={() => toggleFeature(feature)}
                       />
-                      <label className="text-sm cursor-pointer">{feature}</label>
+                      <label className="text-sm cursor-pointer">
+                        {feature}
+                      </label>
                     </div>
                   ))}
                 </div>
@@ -179,20 +187,28 @@ export default function TVProductsPage() {
               <div className="space-y-2">
                 <label className="text-sm font-medium">Promo Banner</label>
                 <Input
-                  value={newProduct.promoBanner || ''}
+                  value={newProduct.promoBanner || ""}
                   onChange={(e) =>
-                    setNewProduct({ ...newProduct, promoBanner: e.target.value })
+                    setNewProduct({
+                      ...newProduct,
+                      promoBanner: e.target.value,
+                    })
                   }
                   placeholder="Special offer description"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Promo Duration (months)</label>
+                <label className="text-sm font-medium">
+                  Promo Duration (months)
+                </label>
                 <Input
                   type="number"
-                  value={newProduct.promoMonths || ''}
+                  value={newProduct.promoMonths || ""}
                   onChange={(e) =>
-                    setNewProduct({ ...newProduct, promoMonths: parseInt(e.target.value) || undefined })
+                    setNewProduct({
+                      ...newProduct,
+                      promoMonths: parseInt(e.target.value) || undefined,
+                    })
                   }
                   placeholder="12"
                 />
@@ -242,7 +258,9 @@ export default function TVProductsPage() {
                     ))}
                   </div>
                 </TableCell>
-                <TableCell>${(product.monthlyPrice || 0).toFixed(2)}/mo</TableCell>
+                <TableCell>
+                  ${(product.monthlyPrice || 0).toFixed(2)}/mo
+                </TableCell>
                 <TableCell>
                   {product.promoBanner && (
                     <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
@@ -308,12 +326,20 @@ export default function TVProductsPage() {
                   <TableRow
                     key={market.id}
                     className="cursor-pointer hover:bg-gray-50"
-                    onClick={() => selectedProduct && handleMarketAssociation(selectedProduct, market.id)}
+                    onClick={() =>
+                      selectedProduct &&
+                      handleMarketAssociation(selectedProduct, market.id)
+                    }
                   >
                     <TableCell className="h-8 py-0">
                       <Checkbox
-                        checked={selectedProduct?.marketIds?.includes(market.id)}
-                        onCheckedChange={() => selectedProduct && handleMarketAssociation(selectedProduct, market.id)}
+                        checked={selectedProduct?.marketIds?.includes(
+                          market.id
+                        )}
+                        onCheckedChange={() =>
+                          selectedProduct &&
+                          handleMarketAssociation(selectedProduct, market.id)
+                        }
                         onClick={(e) => e.stopPropagation()}
                       />
                     </TableCell>
