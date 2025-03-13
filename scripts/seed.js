@@ -269,105 +269,12 @@ markets.forEach(market => {
   marketAudienceMapping[market.key] = market.key;
 });
 
-// // Generate market-TV product relationships
-// const marketTvProducts = [];
-// productsData.forEach(product => {
-//   product.variants.forEach(variant => {
-//     if (variant.audienceType === 'marketType' && variant.audienceValue && marketAudienceMapping[variant.audienceValue]) {
-//       const marketKey = marketAudienceMapping[variant.audienceValue];
-//       const tvProductsInVariant = variant.customizations.tv?.products || {};
-//       Object.values(tvProductsInVariant).forEach(tvProduct => {
-//         const tvProductObj = Array.from(tvProducts.values()).find(p => p.name === tvProduct.name);
-//         if (tvProductObj) {
-//           marketTvProducts.push({
-//             market_key: marketKey,
-//             tv_product_key: tvProductObj.key
-//           });
-//         }
-//       });
-//     }
-//   });
-// });
-
-// // Remove duplicates from marketTvProducts
-// const uniqueMarketTvProducts = [];
-// const tvRelationSet = new Set();
-// marketTvProducts.forEach(relation => {
-//   const key = `${relation.market_key}-${relation.tv_product_key}`;
-//   if (!tvRelationSet.has(key)) {
-//     tvRelationSet.add(key);
-//     uniqueMarketTvProducts.push(relation);
-//   }
-// });
-
-// // Generate market-Voice product relationships
-// const marketVoiceProducts = [];
-// productsData.forEach(product => {
-//   product.variants.forEach(variant => {
-//     if (variant.audienceType === 'marketType' && variant.audienceValue && marketAudienceMapping[variant.audienceValue]) {
-//       const marketId = marketAudienceMapping[variant.audienceValue];
-//       const voiceProductsInVariant = variant.customizations.voice?.products || {};
-//       Object.values(voiceProductsInVariant).forEach(voiceProduct => {
-//         const voiceProductObj = Array.from(voiceProduct.values()).find(p => p.name === voiceProduct.name);
-//         if (voiceProductObj) {
-//           marketVoiceProducts.push({
-//             market_key: marketId,
-//             voice_product_key: voiceProductObj.id
-//           });
-//         }
-//       });
-//     }
-//   });
-// });
-
-// // Remove duplicates from marketVoiceProducts
-// const uniqueMarketVoiceProducts = [];
-// const voiceRelationSet = new Set();
-// marketVoiceProducts.forEach(relation => {
-//   const key = `${relation.market_key}-${relation.voice_product_key}`;
-//   if (!voiceRelationSet.has(key)) {
-//     voiceRelationSet.add(key);
-//     uniqueMarketVoiceProducts.push(relation);
-//   }
-// });
-
-// // Generate market-internet product relationships based on products.json
-// const marketInternetProducts = [];
-// productsData.forEach(product => {
-//   product.variants.forEach(variant => {
-//     if (variant.audienceType === 'marketType' && variant.audienceValue && marketAudienceMapping[variant.audienceValue]) {
-//       const marketId = marketAudienceMapping[variant.audienceValue];
-//       const internetProductsInVariant = variant.customizations.internet?.products || {};
-//       Object.values(internetProductsInVariant).forEach(internetProduct => {
-//         const internetProductObj = Array.from(uniqueInternetProducts.values()).find(p => p.name === internetProduct.name);
-//         if (internetProductObj) {
-//           marketInternetProducts.push({
-//             market_key: marketId,
-//             internet_product_key: internetProductObj.id
-//           });
-//         }
-//       });
-//     }
-//   });
-// });
-
-// // Remove duplicates from marketInternetProducts
-// const uniqueMarketInternetProducts = [];
-// const internetRelationSet = new Set();
-// marketInternetProducts.forEach(relation => {
-//   const key = `${relation.market_key}-${relation.internet_product_key}`;
-//   if (!internetRelationSet.has(key)) {
-//     internetRelationSet.add(key);
-//     uniqueMarketInternetProducts.push(relation);
-//   }
-// });
-
 async function seed() {
   try {
     console.log('Starting database seeding...');
 
     // Clear existing data
-    await sql`TRUNCATE markets, internet_products, channels, tv_products, voice_products, equipment, promotions, ui_elements, market_internet_product, market_tv_product, market_voice_product CASCADE`;
+    await sql`TRUNCATE promotion_product_internet, promotion_product_tv, promotion_product_voice, promotion_product_equipment, promotion_market, markets, internet_products, channels, tv_products, voice_products, equipment, promotions, ui_elements, market_internet_product, market_tv_product, market_voice_product CASCADE`;
     console.log('✓ Existing data cleared');
 
     // Seed markets
@@ -396,17 +303,7 @@ async function seed() {
     }
     console.log('✓ Internet products seeded');
 
-    // // Seed market-internet product relationships
-    // const internetRelations = uniqueMarketInternetProducts.length > 0 ? uniqueMarketInternetProducts : marketInternetProducts;
-    // for (const relation of internetRelations) {
-    //   await sql`
-    //     INSERT INTO market_internet_product (market_key, internet_product_key)
-    //     VALUES (${relation.market_key}, ${relation.internet_product_key})
-    //   `;
-    // }
-    // console.log('✓ Market-Internet Product relationships seeded');
-
-    // Seed TV products from extracted data
+    // Seed TV products
     for (const product of tvProducts) {
       await sql`
         INSERT INTO tv_products (
@@ -422,16 +319,7 @@ async function seed() {
     }
     console.log('✓ TV products seeded');
 
-    // // Seed market-TV product relationships
-    // for (const relation of uniqueMarketTvProducts) {
-    //   await sql`
-    //     INSERT INTO market_tv_product (market_key, tv_product_key)
-    //     VALUES (${relation.market_key}, ${relation.tv_product_key})
-    //   `;
-    // }
-    // console.log('✓ Market-TV Product relationships seeded');
-
-    // Seed Voice products from extracted data
+    // Seed Voice products
     for (const product of voiceProducts) {
       await sql`
         INSERT INTO voice_products (
@@ -447,15 +335,6 @@ async function seed() {
     }
     console.log('✓ Voice products seeded');
 
-    // // Seed market-Voice product relationships
-    // for (const relation of uniqueMarketVoiceProducts) {
-    //   await sql`
-    //     INSERT INTO market_voice_product (market_key, voice_product_key)
-    //     VALUES (${relation.market_key}, ${relation.voice_product_key})
-    //   `;
-    // }
-    // console.log('✓ Market-Voice Product relationships seeded');
-
     // Seed UI elements
     for (const element of uiElements) {
       await sql`
@@ -465,11 +344,12 @@ async function seed() {
     }
     console.log('✓ UI elements seeded');
 
-    // Seed promotions
+    // Seed promotions with relationships
     for (const promotion of promotions) {
+      // Insert base promotion
       await sql`
         INSERT INTO promotions (
-          key, name, start_date, end_date, triggers, products, markets, ui_elements
+          key, name, start_date, end_date, triggers, ui_elements, display_order
         )
         VALUES (
           ${promotion.key},
@@ -477,13 +357,49 @@ async function seed() {
           ${promotion.start_date},
           ${promotion.end_date},
           ${promotion.triggers},
-          ${promotion.products},
-          ${promotion.markets},
-          ${promotion.ui_elements}
+          ${promotion.ui_elements},
+          ${promotions.indexOf(promotion)}
         )
       `;
+      
+      // Insert market associations
+      if (promotion.markets && promotion.markets.length > 0) {
+        for (const marketKey of promotion.markets) {
+          await sql`
+            INSERT INTO promotion_market (promotion_key, market_key)
+            VALUES (${promotion.key}, ${marketKey})
+          `;
+        }
+      }
+      
+      // Insert product associations
+      if (promotion.products && promotion.products.length > 0) {
+        for (const product of promotion.products) {
+          // Determine product type and insert into appropriate join table
+          if (product.product_key.startsWith('P')) {
+            // Assuming P prefix indicates internet product
+            await sql`
+              INSERT INTO promotion_product_internet (promotion_key, product_key, ui_elements)
+              VALUES (${promotion.key}, ${product.product_key}, ${product.ui_elements || []})
+            `;
+          } else if (product.product_key.toLowerCase().includes('stream')) {
+            // Assuming TV product
+            await sql`
+              INSERT INTO promotion_product_tv (promotion_key, product_key, ui_elements)
+              VALUES (${promotion.key}, ${product.product_key}, ${product.ui_elements || []})
+            `;
+          } else if (product.product_key.toLowerCase().includes('voice')) {
+            // Assuming Voice product
+            await sql`
+              INSERT INTO promotion_product_voice (promotion_key, product_key, ui_elements)
+              VALUES (${promotion.key}, ${product.product_key}, ${product.ui_elements || []})
+            `;
+          }
+          // If there were equipment associations, would handle those similarly
+        }
+      }
     }
-    console.log('✓ Promotions seeded');
+    console.log('✓ Promotions and relationships seeded');
 
     console.log('Database seeding completed successfully!');
   } catch (error) {

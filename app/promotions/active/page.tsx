@@ -402,8 +402,91 @@ export default function PromotionsPage() {
     setIsOpen(false);
   };
 
-  const handleProductAssociation = (promotion: any, productKey: string) => {
-    // TODO: Add API call to update product-promotion association
+  const handleProductAssociation = async (promotion: any, productKey: string) => {
+    try {
+      // Determine product type from allProducts
+      const product = allProducts.find(p => {
+        if ('key' in p) {
+          return p.key === productKey;
+        }
+        return p.id === productKey;
+      });
+      
+      if (!product) {
+        toast({
+          title: "Error",
+          description: "Product not found",
+          variant: "destructive",
+        });
+        return;
+      }
+  
+      // Determine the product type based on its properties
+      let productType = product.type.toLowerCase();
+      
+      // Check if the product is already associated
+      const isCurrentlyAssociated = promotion.products?.some(
+        (p: any) => p.productKey === productKey
+      );
+  
+      // Define the endpoint based on operation (associate or disassociate)
+      const endpoint = isCurrentlyAssociated
+        ? '/api/promotions/product/disassociate'
+        : '/api/promotions/product/associate';
+  
+      // Make API call to associate/disassociate product
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          promotionKey: promotion.key,
+          productKey,
+          productType,
+        }),
+      });
+  
+      const data = await response.json();
+  
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to update product association');
+      }
+  
+      toast({
+        title: "Success",
+        description: isCurrentlyAssociated 
+          ? "Product disassociated successfully" 
+          : "Product associated successfully",
+      });
+  
+      // Update local state
+      if (isCurrentlyAssociated) {
+        setSelectedPromotion({
+          ...selectedPromotion,
+          products: selectedPromotion.products.filter(
+            (p: any) => p.productKey !== productKey
+          ),
+        });
+      } else {
+        setSelectedPromotion({
+          ...selectedPromotion,
+          products: [
+            ...selectedPromotion.products,
+            { productKey, productType, ui_elements: [] },
+          ],
+        });
+      }
+    } catch (error) {
+      console.error("Failed to update product association:", error);
+      toast({
+        title: "Error",
+        description: error instanceof Error 
+          ? error.message 
+          : "Failed to update product association",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleMarketAssociation = (promotion: any, marketId: string) => {

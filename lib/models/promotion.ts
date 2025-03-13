@@ -9,15 +9,23 @@ export interface UIElement {
 }
 
 export interface ProductAssociation {
+  id?: number;
+  promotionKey: string;
   productKey: string;
-  productType: string;
+  productType: 'internet' | 'tv' | 'voice' | 'equipment';
   ui_elements: UIElement[];
 }
 
 export interface TriggerConfig {
   siteWide?: boolean;
-  cmsBlock?: boolean;
+  cmsBlock?: string;
   promoCode?: string;
+  abandonedCartCode?: string;
+}
+
+export interface MarketAssociation {
+  promotionKey: string;
+  marketKey: string;
 }
 
 export interface Promotion {
@@ -26,8 +34,10 @@ export interface Promotion {
   startDate?: Date;
   endDate?: Date;
   triggers?: TriggerConfig[];
-  products?: ProductAssociation[];
-  markets?: string[];
   ui_elements?: UIElement[];
   display_order: number;
+  
+  // Relations - these would be populated by your API when needed
+  productAssociations?: ProductAssociation[];
+  marketAssociations?: MarketAssociation[];
 }

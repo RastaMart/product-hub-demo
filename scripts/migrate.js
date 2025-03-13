@@ -9,6 +9,10 @@ async function migrate() {
 
     // Drop tables in reverse order of dependency (to avoid foreign key conflicts)
     console.log('Dropping existing tables...');
+    await sql`DROP TABLE IF EXISTS promotion_product_internet CASCADE`;
+    await sql`DROP TABLE IF EXISTS promotion_product_tv CASCADE`;
+    await sql`DROP TABLE IF EXISTS promotion_product_voice CASCADE`;
+    await sql`DROP TABLE IF EXISTS promotion_market CASCADE`;
     await sql`DROP TABLE IF EXISTS market_voice_product CASCADE`;
     await sql`DROP TABLE IF EXISTS market_tv_product CASCADE`;
     await sql`DROP TABLE IF EXISTS market_internet_product CASCADE`;
@@ -149,7 +153,7 @@ async function migrate() {
     `;
     console.log('✓ Equipment table created');
 
-    // Create promotions table
+    // Create promotions table - remove products array as it's now in join tables
     await sql`
       CREATE TABLE IF NOT EXISTS promotions (
         key TEXT PRIMARY KEY,
@@ -157,13 +161,76 @@ async function migrate() {
         start_date TIMESTAMPTZ NOT NULL,
         end_date TIMESTAMPTZ NOT NULL,
         triggers JSONB[] NOT NULL DEFAULT '{}',
-        products JSONB[] NOT NULL DEFAULT '{}',
-        markets TEXT[] NOT NULL DEFAULT '{}',
         ui_elements JSONB[] NOT NULL DEFAULT '{}',
         display_order INTEGER NOT NULL DEFAULT 0
       )
     `;
     console.log('✓ Promotions table created');
+
+    // Create promotion_market join table
+    await sql`
+      CREATE TABLE IF NOT EXISTS promotion_market (
+        promotion_key TEXT NOT NULL,
+        market_key TEXT NOT NULL,
+        PRIMARY KEY (promotion_key, market_key),
+        FOREIGN KEY (promotion_key) REFERENCES promotions(key) ON DELETE CASCADE,
+        FOREIGN KEY (market_key) REFERENCES markets(key) ON DELETE CASCADE
+      )
+    `;
+    console.log('✓ Promotion-Market join table created');
+
+    // Create promotion-product join tables for each product type
+    await sql`
+      CREATE TABLE IF NOT EXISTS promotion_product_internet (
+        id SERIAL PRIMARY KEY,
+        promotion_key TEXT NOT NULL,
+        product_key TEXT NOT NULL,
+        ui_elements JSONB[] NOT NULL DEFAULT '{}',
+        FOREIGN KEY (promotion_key) REFERENCES promotions(key) ON DELETE CASCADE,
+        FOREIGN KEY (product_key) REFERENCES internet_products(key) ON DELETE CASCADE,
+        UNIQUE(promotion_key, product_key)
+      )
+    `;
+    console.log('✓ Promotion-Internet Product join table created');
+
+    await sql`
+      CREATE TABLE IF NOT EXISTS promotion_product_tv (
+        id SERIAL PRIMARY KEY,
+        promotion_key TEXT NOT NULL,
+        product_key TEXT NOT NULL,
+        ui_elements JSONB[] NOT NULL DEFAULT '{}',
+        FOREIGN KEY (promotion_key) REFERENCES promotions(key) ON DELETE CASCADE,
+        FOREIGN KEY (product_key) REFERENCES tv_products(key) ON DELETE CASCADE,
+        UNIQUE(promotion_key, product_key)
+      )
+    `;
+    console.log('✓ Promotion-TV Product join table created');
+
+    await sql`
+      CREATE TABLE IF NOT EXISTS promotion_product_voice (
+        id SERIAL PRIMARY KEY,
+        promotion_key TEXT NOT NULL,
+        product_key TEXT NOT NULL,
+        ui_elements JSONB[] NOT NULL DEFAULT '{}',
+        FOREIGN KEY (promotion_key) REFERENCES promotions(key) ON DELETE CASCADE,
+        FOREIGN KEY (product_key) REFERENCES voice_products(key) ON DELETE CASCADE,
+        UNIQUE(promotion_key, product_key)
+      )
+    `;
+    console.log('✓ Promotion-Voice Product join table created');
+
+    await sql`
+      CREATE TABLE IF NOT EXISTS promotion_product_equipment (
+        id SERIAL PRIMARY KEY,
+        promotion_key TEXT NOT NULL,
+        product_key TEXT NOT NULL,
+        ui_elements JSONB[] NOT NULL DEFAULT '{}',
+        FOREIGN KEY (promotion_key) REFERENCES promotions(key) ON DELETE CASCADE,
+        FOREIGN KEY (product_key) REFERENCES equipment(key) ON DELETE CASCADE,
+        UNIQUE(promotion_key, product_key)
+      )
+    `;
+    console.log('✓ Promotion-Equipment join table created');
 
     // Create ui_elements table
     await sql`
