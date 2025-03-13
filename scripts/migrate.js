@@ -159,7 +159,8 @@ async function migrate() {
         triggers JSONB[] NOT NULL DEFAULT '{}',
         products JSONB[] NOT NULL DEFAULT '{}',
         markets TEXT[] NOT NULL DEFAULT '{}',
-        ui_elements JSONB[] NOT NULL DEFAULT '{}'
+        ui_elements JSONB[] NOT NULL DEFAULT '{}',
+        display_order INTEGER NOT NULL DEFAULT 0
       )
     `;
     console.log('✓ Promotions table created');

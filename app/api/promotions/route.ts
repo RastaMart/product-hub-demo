@@ -4,7 +4,7 @@ import sql from "@/lib/db";
 export async function GET() {
   try {
     const promotions =
-      await sql`SELECT * FROM promotions ORDER BY start_date DESC`;
+      await sql`SELECT * FROM promotions ORDER BY display_order ASC`;
     return NextResponse.json(promotions);
   } catch (error) {
     console.error("Failed to fetch promotions:", error);
@@ -41,6 +41,12 @@ export async function POST(request: Request) {
       startDate
     ).getFullYear()}`;
 
+    // Get the maximum display_order and add 1 for the new promotion
+    const maxOrderResult = await sql`
+      SELECT COALESCE(MAX(display_order), -1) as max_order FROM promotions
+    `;
+    const display_order = (maxOrderResult[0]?.max_order || -1) + 1;
+
     // Insert new promotion
     const result = await sql`
       INSERT INTO promotions (
@@ -51,7 +57,8 @@ export async function POST(request: Request) {
         triggers,
         products,
         markets,
-        ui_elements
+        ui_elements,
+        display_order
       )
       VALUES (
         ${key},
@@ -61,7 +68,8 @@ export async function POST(request: Request) {
         ${triggers || []},
         ${products || []},
         ${markets || []},
-        ${ui_elements || []}
+        ${ui_elements || []},
+        ${display_order}
       )
       RETURNING *
     `;

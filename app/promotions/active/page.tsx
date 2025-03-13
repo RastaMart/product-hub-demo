@@ -263,7 +263,8 @@ function SortableRow({
 
 export default function PromotionsPage() {
   const [isClient, setIsClient] = useState(false);
-  const { data: promotions = [] } = useData<any>('/api/promotions');
+  const { data: fetchedPromotions = [] } = useData<any>('/api/promotions');
+  const [promotions, setPromotions] = useState<any[]>([]);
   const { data: markets = [] } = useData<Market>('/api/markets');
   const { data: internetProducts = [] } = useData<InternetProduct>(
     '/api/products/internet'
@@ -288,6 +289,13 @@ export default function PromotionsPage() {
     setIsClient(true);
   }, []);
 
+  // Add effect to update promotions state when data is loaded
+  useEffect(() => {
+    if (fetchedPromotions.length > 0) {
+      setPromotions(fetchedPromotions);
+    }
+  }, [fetchedPromotions]);
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -295,12 +303,58 @@ export default function PromotionsPage() {
     })
   );
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
-      console.log('handleDragEnd');
-      // TODO: Add API call to update promotion order
+      // Update local state
+      setPromotions((items) => {
+        // Find the indexes of the dragged item and the drop target
+        const activeIndex = items.findIndex(item => item.key === active.id);
+        const overIndex = items.findIndex(item => item.key === over.id);
+        
+        // Return the reordered array
+        return arrayMove(items, activeIndex, overIndex);
+      });
+
+      try {
+        // Get the updated promotions after state update
+        const updatedPromotions = [...promotions];
+        const activeIndex = updatedPromotions.findIndex(item => item.key === active.id);
+        const overIndex = updatedPromotions.findIndex(item => item.key === over.id);
+        const reorderedPromotions = arrayMove(updatedPromotions, activeIndex, overIndex);
+
+        // Save to the database
+        const response = await fetch('/api/promotions/reorder', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            promotions: reorderedPromotions.map(p => ({ key: p.key }))
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to update promotion order');
+        }
+
+        toast({
+          title: 'Success',
+          description: 'Promotion order updated successfully',
+        });
+      } catch (error) {
+        console.error('Failed to update promotion order:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to update promotion order',
+          variant: 'destructive',
+        });
+        
+        // If API call fails, revert to the original order by refetching
+        // Alternatively, you could keep track of the previous order and revert to it
+        window.location.reload();
+      }
     }
   };
 
@@ -430,7 +484,7 @@ export default function PromotionsPage() {
             </TableHeader>
             <TableBody>
               <SortableContext
-                items={currentPromotions}
+                items={currentPromotions.map(item => item.key)}
                 strategy={verticalListSortingStrategy}
               >
                 {currentPromotions.map((promotion) => {
