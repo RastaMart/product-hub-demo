@@ -19,7 +19,6 @@ export interface PromoType {
 }
 
 export interface Promotion {
-  id: string;
   key: string;
   name: string;
   startDate: Date;

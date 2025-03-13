@@ -50,7 +50,7 @@ import { UIElementModal } from '.././components/ui-element-modal';
 
 interface SortableRowProps {
   promotion: {
-    id: string;
+    key: string;
     name: string;
     start_date: string;
     end_date: string;
@@ -61,8 +61,8 @@ interface SortableRowProps {
   };
   onAssociate: (promotion: any) => void;
   onConfigureUI: (promotion: any) => void;
-  expandedRows: string[];
-  onToggleExpand: (id: string) => void;
+  isExpanded: boolean;
+  onToggleExpand: (key: string) => void;
   allProducts: any[];
   markets: Market[];
 }
@@ -71,7 +71,7 @@ function SortableRow({
   promotion,
   onAssociate,
   onConfigureUI,
-  expandedRows,
+  isExpanded,
   onToggleExpand,
   allProducts,
   markets,
@@ -83,7 +83,7 @@ function SortableRow({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: promotion.id });
+  } = useSortable({ id: promotion.key });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -93,17 +93,16 @@ function SortableRow({
     backgroundColor: isDragging ? 'white' : undefined,
   } as React.CSSProperties;
 
-  const isExpanded = expandedRows.includes(promotion.id);
 
   const getProductName = (productKey: string) => {
     const product = allProducts.find((p) =>
-      'key' in p ? p.key === productKey : p.id === productKey
+      'key' in p ? p.key === productKey : p.key === productKey
     );
     return product ? product.name : productKey;
   };
 
   const getMarketName = (marketId: string) => {
-    const market = markets.find((m) => m.id === marketId);
+    const market = markets.find((m) => m.key === marketId);
     return market ? market.label : marketId;
   };
 
@@ -127,15 +126,15 @@ function SortableRow({
               variant="ghost"
               size="sm"
               className="p-0 hover:bg-transparent"
-              onClick={() => onToggleExpand(promotion.id)}
+              onClick={() => onToggleExpand(promotion.key)}
             >
               {isExpanded ? (
                 <ChevronDown className="h-4 w-4" />
               ) : (
                 <ChevronRight className="h-4 w-4" />
               )}
-            </Button>
             <span className="font-medium">{promotion.name}</span>
+            </Button>
           </div>
         </TableCell>
         <TableCell>
@@ -300,6 +299,7 @@ export default function PromotionsPage() {
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
+      console.log('handleDragEnd');
       // TODO: Add API call to update promotion order
     }
   };
@@ -374,11 +374,11 @@ export default function PromotionsPage() {
     // TODO: Add API call to remove UI element from promotion
   };
 
-  const toggleExpand = (id: string) => {
+  const toggleExpand = (key: string) => {
     setExpandedRows((current) =>
-      current.includes(id)
-        ? current.filter((rowId) => rowId !== id)
-        : [...current, id]
+      current.includes(key)
+        ? current.filter((rowKey) => rowKey !== key)
+        : [...current, key]
     );
   };
 
@@ -433,18 +433,20 @@ export default function PromotionsPage() {
                 items={currentPromotions}
                 strategy={verticalListSortingStrategy}
               >
-                {currentPromotions.map((promotion) => (
+                {currentPromotions.map((promotion) => {
+                  const isExpanded = expandedRows.includes(promotion.key);
+                  return (
                   <SortableRow
-                    key={promotion.id}
+                    key={promotion.key}
                     promotion={promotion}
                     onAssociate={openAssociationModal}
                     onConfigureUI={openUIElementModal}
-                    expandedRows={expandedRows}
+                    isExpanded={isExpanded}
                     onToggleExpand={toggleExpand}
                     allProducts={allProducts}
                     markets={markets}
                   />
-                ))}
+                );})}
               </SortableContext>
             </TableBody>
           </Table>
