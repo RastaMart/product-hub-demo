@@ -246,12 +246,111 @@ const promotions = [
   }
 ];
 
+// Sample TV products
+const tvProducts = [
+  {
+    id: '1',
+    name: 'Basic TV',
+    type: 'Cable',
+    channels: ['1', '2', '3', '4', '5'],
+    features: ['Local channels', 'HD Available'],
+    market_ids: ['1', '2', '3'],
+    promo_banner: 'First month at half price',
+    promo_months: 1,
+    monthly_price: 29.99
+  },
+  {
+    id: '2',
+    name: 'Essential TV',
+    type: 'Cable',
+    channels: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
+    features: ['Local channels', 'Popular networks', 'HD Available'],
+    market_ids: ['1', '4'],
+    promo_banner: 'Free DVR for 3 months',
+    promo_months: 3,
+    monthly_price: 49.99
+  },
+  {
+    id: '3',
+    name: 'Stream TV',
+    type: 'Stream',
+    channels: ['3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15'],
+    features: ['No cable box needed', 'Watch on any device', 'Cloud DVR included'],
+    market_ids: ['2', '3', '4'],
+    promo_banner: '2 months free premium channels',
+    promo_months: 2,
+    monthly_price: 69.99
+  }
+];
+
+// Sample Voice products
+const voiceProducts = [
+  {
+    id: '1',
+    name: 'Basic Voice',
+    type: 'Landline',
+    features: ['Unlimited local calls', 'Voicemail'],
+    market_ids: ['1', '2', '3'],
+    promo_banner: 'Free activation',
+    promo_months: 0,
+    monthly_price: 19.99
+  },
+  {
+    id: '2',
+    name: 'Premium Voice',
+    type: 'VoIP',
+    features: ['Unlimited nationwide calls', 'Caller ID', 'Call waiting', 'Voicemail to email'],
+    market_ids: ['1', '3', '4'],
+    promo_banner: 'First month free',
+    promo_months: 1,
+    monthly_price: 29.99
+  }
+];
+
+// Define market-internet product relationships
+const marketInternetProducts = [
+  { market_id: '1', internet_product_id: '1' },
+  { market_id: '1', internet_product_id: '2' },
+  { market_id: '1', internet_product_id: '4' },
+  { market_id: '2', internet_product_id: '1' },
+  { market_id: '2', internet_product_id: '2' },
+  { market_id: '2', internet_product_id: '3' },
+  { market_id: '3', internet_product_id: '1' },
+  { market_id: '3', internet_product_id: '3' },
+  { market_id: '3', internet_product_id: '4' },
+  { market_id: '4', internet_product_id: '2' },
+  { market_id: '4', internet_product_id: '3' },
+  { market_id: '4', internet_product_id: '4' }
+];
+
+// Define market-TV product relationships
+const marketTvProducts = [
+  { market_id: '1', tv_product_id: '1' },
+  { market_id: '1', tv_product_id: '2' },
+  { market_id: '2', tv_product_id: '1' },
+  { market_id: '2', tv_product_id: '3' },
+  { market_id: '3', tv_product_id: '1' },
+  { market_id: '3', tv_product_id: '3' },
+  { market_id: '4', tv_product_id: '2' },
+  { market_id: '4', tv_product_id: '3' }
+];
+
+// Define market-Voice product relationships
+const marketVoiceProducts = [
+  { market_id: '1', voice_product_id: '1' },
+  { market_id: '1', voice_product_id: '2' },
+  { market_id: '2', voice_product_id: '1' },
+  { market_id: '3', voice_product_id: '1' },
+  { market_id: '3', voice_product_id: '2' },
+  { market_id: '4', voice_product_id: '2' }
+];
+
 async function seed() {
   try {
     console.log('Starting database seeding...');
 
     // Clear existing data
-    await sql`TRUNCATE markets, internet_products, channels, tv_products, voice_products, equipment, promotions, ui_elements CASCADE`;
+    await sql`TRUNCATE markets, internet_products, channels, tv_products, voice_products, equipment, promotions, ui_elements, market_internet_product, market_tv_product, market_voice_product CASCADE`;
     console.log('✓ Existing data cleared');
 
     // Seed markets
@@ -263,22 +362,81 @@ async function seed() {
     }
     console.log('✓ Markets seeded');
 
-    // Seed internet products
+    // Seed internet products - remove market_ids from the insert
     for (const product of internetProducts) {
       await sql`
         INSERT INTO internet_products (
-          id, key, name, download_speed, upload_speed, technology, market_ids,
+          id, key, name, download_speed, upload_speed, technology,
           ideal_for, promo_banner, promo_months, banner_text, banner_color
         )
         VALUES (
           ${product.id}, ${product.key}, ${product.name}, ${product.download_speed},
-          ${product.upload_speed}, ${product.technology}, ${product.market_ids},
+          ${product.upload_speed}, ${product.technology},
           ${product.ideal_for}, ${product.promo_banner}, ${product.promo_months},
           ${product.banner_text}, ${product.banner_color}
         )
       `;
     }
     console.log('✓ Internet products seeded');
+
+    // Seed market-internet product relationships
+    for (const relation of marketInternetProducts) {
+      await sql`
+        INSERT INTO market_internet_product (market_id, internet_product_id)
+        VALUES (${relation.market_id}, ${relation.internet_product_id})
+      `;
+    }
+    console.log('✓ Market-Internet Product relationships seeded');
+
+    // Seed TV products
+    for (const product of tvProducts) {
+      await sql`
+        INSERT INTO tv_products (
+          id, name, type, channels, features,
+          promo_banner, promo_months, monthly_price
+        )
+        VALUES (
+          ${product.id}, ${product.name}, ${product.type}, ${product.channels},
+          ${product.features}, ${product.promo_banner}, ${product.promo_months},
+          ${product.monthly_price}
+        )
+      `;
+    }
+    console.log('✓ TV products seeded');
+
+    // Seed market-TV product relationships
+    for (const relation of marketTvProducts) {
+      await sql`
+        INSERT INTO market_tv_product (market_id, tv_product_id)
+        VALUES (${relation.market_id}, ${relation.tv_product_id})
+      `;
+    }
+    console.log('✓ Market-TV Product relationships seeded');
+
+    // Seed Voice products
+    for (const product of voiceProducts) {
+      await sql`
+        INSERT INTO voice_products (
+          id, name, type, features,
+          promo_banner, promo_months, monthly_price
+        )
+        VALUES (
+          ${product.id}, ${product.name}, ${product.type}, ${product.features},
+          ${product.promo_banner}, ${product.promo_months},
+          ${product.monthly_price}
+        )
+      `;
+    }
+    console.log('✓ Voice products seeded');
+
+    // Seed market-Voice product relationships
+    for (const relation of marketVoiceProducts) {
+      await sql`
+        INSERT INTO market_voice_product (market_id, voice_product_id)
+        VALUES (${relation.market_id}, ${relation.voice_product_id})
+      `;
+    }
+    console.log('✓ Market-Voice Product relationships seeded');
 
     // Seed UI elements
     for (const element of uiElements) {

@@ -6,7 +6,7 @@ export interface InternetProduct {
   upload_speed: number;
   technology: ("coax" | "Fiber G" | "Fiber P")[];
   snapshotId?: string;
-  marketIds?: string[];
+  // marketIds removed, as it's now a many-to-many relationship
   idealFor: string;
   promoBanner?: string;
   promoMonths?: number;
@@ -14,4 +14,6 @@ export interface InternetProduct {
     text: string;
     color: string;
   };
+  // New property to represent the many-to-many relationship when needed in code
+  markets?: string[];
 }
