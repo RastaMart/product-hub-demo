@@ -11,12 +11,12 @@ async function migrate() {
     await sql`
       CREATE TABLE IF NOT EXISTS markets (
         id TEXT PRIMARY KEY,
+        key TEXT,
         label TEXT NOT NULL,
         code TEXT NOT NULL UNIQUE,
         active BOOLEAN NOT NULL DEFAULT true,
         snapshot_id TEXT,
-        product_keys TEXT[],
-        audience_value TEXT
+        product_keys TEXT[]
       )
     `;
     console.log('✓ Markets table created');
