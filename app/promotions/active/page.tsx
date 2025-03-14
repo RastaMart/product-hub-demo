@@ -25,6 +25,8 @@ import {
   GripVertical,
   ChevronDown,
   ChevronRight,
+  Package,
+  Network,
 } from "lucide-react";
 import { format } from "date-fns";
 import {
@@ -45,7 +47,8 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { CreatePromotionModal } from ".././components/create-promotion-modal";
-import { AssociationModal } from ".././components/association-modal";
+import { ProductAssociationModal } from ".././components/product-association-modal";
+import { MarketAssociationModal } from ".././components/market-association-modal";
 import { UIElementModal } from ".././components/ui-element-modal";
 
 interface SortableRowProps {
@@ -54,12 +57,13 @@ interface SortableRowProps {
     name: string;
     start_date: string;
     end_date: string;
-    types: any[];
+    triggers: any[];
     products: any[];
     markets: string[];
     ui_elements: any[];
   };
-  onAssociate: (promotion: any) => void;
+  onAssociateProducts: (promotion: any) => void;
+  onAssociateMarkets: (promotion: any) => void;
   onConfigureUI: (promotion: any) => void;
   isExpanded: boolean;
   onToggleExpand: (key: string) => void;
@@ -69,7 +73,8 @@ interface SortableRowProps {
 
 function SortableRow({
   promotion,
-  onAssociate,
+  onAssociateProducts,
+  onAssociateMarkets,
   onConfigureUI,
   isExpanded,
   onToggleExpand,
@@ -190,16 +195,9 @@ function SortableRow({
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => onAssociate(promotion)}
-              className="h-8 w-8"
-            >
-              <LinkIcon className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
               onClick={() => onConfigureUI(promotion)}
               className="h-8 w-8"
+              title="Configure UI Elements"
             >
               <Settings2 className="h-4 w-4" />
             </Button>
@@ -209,10 +207,19 @@ function SortableRow({
       {isExpanded && (
         <TableRow className="bg-gray-50">
           <TableCell colSpan={6} className="p-4">
-            <div className="space-y-4">
+            <div className="space-y-4 px-8">
               <div>
                 <h4 className="text-sm font-medium mb-2">
                   Associated Products
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onAssociateProducts(promotion)}
+                    className="h-8 w-8"
+                    title="Associate Products"
+                  >
+                    <LinkIcon className="h-4 w-4" />
+                  </Button>
                 </h4>
                 <div className="grid grid-cols-2 gap-2">
                   {promotion.products.map((pkg) => (
@@ -225,12 +232,12 @@ function SortableRow({
                       </p>
                       {pkg.ui_elements.length > 0 && (
                         <div className="mt-1 flex flex-wrap gap-1">
-                          {pkg.ui_elements.map((element) => (
+                          {pkg.ui_elements.map(({ ui_elementKey }) => (
                             <span
-                              key={element.key}
+                              key={ui_elementKey}
                               className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700"
                             >
-                              {element.key}
+                              {ui_elementKey}
                             </span>
                           ))}
                         </div>
@@ -240,7 +247,18 @@ function SortableRow({
                 </div>
               </div>
               <div>
-                <h4 className="text-sm font-medium mb-2">Associated Markets</h4>
+                <h4 className="text-sm font-medium mb-2">
+                  Associated Markets
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onAssociateMarkets(promotion)}
+                    className="h-8 w-8"
+                    title="Associate Markets"
+                  >
+                    <LinkIcon className="h-4 w-4" />
+                  </Button>
+                </h4>
                 <div className="grid grid-cols-3 gap-2">
                   {promotion.markets?.map((marketId) => (
                     <div
@@ -276,7 +294,9 @@ export default function PromotionsPage() {
     "/api/products/equipment"
   );
   const [isOpen, setIsOpen] = useState(false);
-  const [isAssociationOpen, setIsAssociationOpen] = useState(false);
+  const [isProductAssociationOpen, setIsProductAssociationOpen] =
+    useState(false);
+  const [isMarketAssociationOpen, setIsMarketAssociationOpen] = useState(false);
   const [selectedPromotion, setSelectedPromotion] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [isUIElementOpen, setIsUIElementOpen] = useState(false);
@@ -533,9 +553,14 @@ export default function PromotionsPage() {
     }
   };
 
-  const openAssociationModal = (promotion: any) => {
+  const openProductAssociationModal = (promotion: any) => {
     setSelectedPromotion(promotion);
-    setIsAssociationOpen(true);
+    setIsProductAssociationOpen(true);
+  };
+
+  const openMarketAssociationModal = (promotion: any) => {
+    setSelectedPromotion(promotion);
+    setIsMarketAssociationOpen(true);
   };
 
   const openUIElementModal = (promotion: any) => {
@@ -616,7 +641,8 @@ export default function PromotionsPage() {
                     <SortableRow
                       key={promotion.key}
                       promotion={promotion}
-                      onAssociate={openAssociationModal}
+                      onAssociateProducts={openProductAssociationModal}
+                      onAssociateMarkets={openMarketAssociationModal}
                       onConfigureUI={openUIElementModal}
                       isExpanded={isExpanded}
                       onToggleExpand={toggleExpand}
@@ -660,12 +686,18 @@ export default function PromotionsPage() {
         onCreatePromotion={handleCreatePromotion}
       />
 
-      <AssociationModal
-        isOpen={isAssociationOpen}
-        onOpenChange={setIsAssociationOpen}
+      <ProductAssociationModal
+        isOpen={isProductAssociationOpen}
+        onOpenChange={setIsProductAssociationOpen}
         selectedPromotion={selectedPromotion}
         allProducts={allProducts}
         onProductAssociation={handleProductAssociation}
+      />
+
+      <MarketAssociationModal
+        isOpen={isMarketAssociationOpen}
+        onOpenChange={setIsMarketAssociationOpen}
+        selectedPromotion={selectedPromotion}
         onMarketAssociation={handleMarketAssociation}
       />
 
