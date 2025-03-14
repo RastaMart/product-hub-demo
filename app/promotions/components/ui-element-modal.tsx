@@ -52,11 +52,15 @@ export function UIElementModal({
       img_desktopImgUrl: "",
       img_mobileImgUrl: "",
       img_alt: "",
+      element_type: keyDef?.type,
     });
   };
 
   const handleAddUIElement = () => {
     if (!newUIElement.key) return;
+    // promotionKey: string;
+    // productKey: string;
+    // productType: string;
     onAddUIElement(newUIElement as UIElement);
     setNewUIElement({
       key: "",

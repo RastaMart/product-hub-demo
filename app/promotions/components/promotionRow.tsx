@@ -204,8 +204,10 @@ export function PromotionRow({
                             className="px-2 py-0 h-6 rounded-full text-xs font-medium bg-gray-100 text-gray-700 hover:bg-gray-200"
                             onClick={() =>
                               onConfigureUI({
-                                ...promotion,
-                                selectedProductKey: pkg.productKey,
+                                promotionKey: promotion.key,
+                                productKey: pkg.productKey,
+                                productType: pkg.productType,
+                                promoXproductID: pkg.relation_id,
                               })
                             }
                           >
@@ -221,8 +223,10 @@ export function PromotionRow({
                             className="px-2 py-0 h-6 rounded-full text-xs font-medium bg-gray-100 text-gray-700 hover:bg-gray-200"
                             onClick={() =>
                               onConfigureUI({
-                                ...promotion,
-                                selectedProductKey: pkg.productKey,
+                                promotionKey: promotion.key,
+                                productKey: pkg.productKey,
+                                productType: pkg.productType,
+                                promoXproductID: pkg.relation_id,
                               })
                             }
                           >

@@ -23,6 +23,7 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const {
+      key,
       element_type,
       txt_text,
       img_desktopImgUrl,
@@ -38,19 +39,16 @@ export async function POST(request: Request) {
       );
     }
 
-    // Check if element_type exists in ui_element_types
+    // Check if key exists in ui_element_types
     const typeExists = await sql`
-      SELECT key, type FROM ui_element_types WHERE key = ${element_type}
+      SELECT key, type FROM ui_element_types WHERE key = ${key}
     `;
 
     if (typeExists.length === 0) {
-      return NextResponse.json(
-        { error: "Invalid element_type" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Invalid key" }, { status: 400 });
     }
 
-    const elementTypeType = typeExists[0].type;
+    const elementTypeType = element_type;
 
     // Insert new UI element
     const result = await sql`
@@ -63,8 +61,8 @@ export async function POST(request: Request) {
         img_alt
       )
       VALUES (
+        ${key},
         ${element_type},
-        ${elementTypeType},
         ${txt_text || null},
         ${img_desktopImgUrl || null},
         ${img_mobileImgUrl || null},
@@ -77,7 +75,7 @@ export async function POST(request: Request) {
       success: true,
       data: {
         id: result[0].id,
-        element_type,
+        element_type: key,
         element_type_type: elementTypeType,
         txt_text,
         img_desktopImgUrl,

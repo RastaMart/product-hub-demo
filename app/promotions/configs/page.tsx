@@ -46,7 +46,6 @@ export default function ConfigsPage() {
 
     setIsSubmitting(true);
     try {
-      console.log("newElement", newElement);
       const response = await fetch("/api/ui-elements", {
         method: "POST",
         headers: {

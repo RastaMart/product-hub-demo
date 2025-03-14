@@ -52,6 +52,13 @@ import { MarketAssociationModal } from ".././components/market-association-modal
 import { UIElementModal } from ".././components/ui-element-modal";
 import { PromotionRow } from ".././components/promotionRow";
 
+interface NewUIElementContext {
+  promotionKey: string;
+  productKey: string;
+  productType: string;
+  promoXproductID: number;
+}
+
 interface SortableRowProps {
   promotion: {
     key: string;
@@ -65,7 +72,7 @@ interface SortableRowProps {
   };
   onAssociateProducts: (promotion: any) => void;
   onAssociateMarkets: (promotion: any) => void;
-  onConfigureUI: (promotion: any) => void;
+  onConfigureUI: (newUIElementContextParam: NewUIElementContext) => void;
   isExpanded: boolean;
   onToggleExpand: (key: string) => void;
   allProducts: any[];
@@ -138,6 +145,13 @@ export default function PromotionsPage() {
   const [selectedPromotion, setSelectedPromotion] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [isUIElementOpen, setIsUIElementOpen] = useState(false);
+  const [newUIElementContext, setNewUIElementContext] =
+    useState<NewUIElementContext>({
+      promotionKey: "",
+      productKey: "",
+      productType: "",
+      promoXproductID: 0,
+    });
   const [expandedRows, setExpandedRows] = useState<string[]>([]);
   const { toast } = useToast();
   const itemsPerPage = 10;
@@ -401,21 +415,125 @@ export default function PromotionsPage() {
     setIsMarketAssociationOpen(true);
   };
 
-  const openUIElementModal = (promotion: any) => {
-    console.log("Opening UI element modal for promotion", promotion);
-    setSelectedPromotion(promotion);
+  const openUIElementModal = (
+    newUIElementContextParam: NewUIElementContext
+  ) => {
+    console.log("Opening UI element modal for", newUIElementContextParam);
+    setNewUIElementContext(newUIElementContextParam);
     setIsUIElementOpen(true);
   };
 
-  const handleAddUIElement = (element: UIElement) => {
-    console.log("Adding UI element", element, selectedPromotion);
-    const { key: promotionKey, selectedProductKey } = selectedPromotion;
-    // TODO: Add API call to add UI element to promotion
+  const handleAddUIElement = async (newElement: UIElement) => {
+    console.log("Adding UI element", newElement, newUIElementContext);
+    const { promotionKey, productKey, productType, promoXproductID } =
+      newUIElementContext;
+    if (!promotionKey || !productKey || !productType) {
+      toast({
+        title: "Error",
+        description: "Missing promotion or product information",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Determine the product association table based on the product type
+    const productTable = `promotion_product_${productType.toLowerCase()}`;
+
+    try {
+      // First create the UI element
+      const elementResponse = await fetch("/api/ui-elements/elements", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newElement),
+      });
+
+      if (!elementResponse.ok) {
+        const errorData = await elementResponse.json();
+        throw new Error(errorData.error || "Failed to create UI element");
+      }
+
+      const { data: element } = await elementResponse.json();
+      const selectedProductKey = productKey; // Store this for later reference
+      const body = {
+        product_association_id: promoXproductID,
+        product_association_table: productTable,
+        element_id: element.id,
+      };
+      const response = await fetch("/api/ui-elements/product-association", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error || "Failed to associate UI element with product"
+        );
+      }
+
+      toast({
+        title: "Success",
+        description: "UI element associated with product successfully",
+      });
+
+      // Update the local state to reflect the new association
+      setPromotions((currentPromotions) => {
+        return currentPromotions.map((p) => {
+          if (p.key === promotionKey) {
+            return {
+              ...p,
+              products: p.products.map((prod: any) => {
+                if (prod.productKey === selectedProductKey) {
+                  return {
+                    ...prod,
+                    ui_elements: [...(prod.ui_elements || []), element],
+                  };
+                }
+                return prod;
+              }),
+            };
+          }
+          return p;
+        });
+      });
+
+      // Update selectedPromotion if needed
+      if (selectedPromotion) {
+        setSelectedPromotion({
+          ...selectedPromotion,
+          products: selectedPromotion.products.map((prod: any) => {
+            if (prod.productKey === selectedProductKey) {
+              return {
+                ...prod,
+                ui_elements: [...(prod.ui_elements || []), element],
+              };
+            }
+            return prod;
+          }),
+        });
+      }
+    } catch (error) {
+      console.error("Failed to associate UI element:", error);
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to associate UI element",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleRemoveUIElement = (elementKey: string) => {
+  const handleRemoveUIElement = async (elementKey: string) => {
     console.log("Removing UI element", elementKey);
-    // TODO: Add API call to remove UI element from promotion
+    // TODO: Complete the API call to remove UI element from promotion
   };
 
   const toggleExpand = (key: string) => {

@@ -9,7 +9,7 @@ export interface UIElement {
 }
 
 export interface ProductAssociation {
-  id?: number;
+  relation_id: number;
   promotionKey: string;
   productKey: string;
   productType: "internet" | "tv" | "voice" | "equipment";

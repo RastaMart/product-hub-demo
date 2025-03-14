@@ -10,6 +10,7 @@ export async function GET() {
         (
           SELECT json_agg(
             json_build_object(
+              'relation_id', ppi.id, 
               'productKey', ppi.product_key, 
               'productType', 'internet',
               'ui_elements', ppi.ui_elements
@@ -21,6 +22,7 @@ export async function GET() {
         (
           SELECT json_agg(
             json_build_object(
+              'relation_id', ppt.id, 
               'productKey', ppt.product_key, 
               'productType', 'tv',
               'ui_elements', ppt.ui_elements
@@ -32,6 +34,7 @@ export async function GET() {
         (
           SELECT json_agg(
             json_build_object(
+              'relation_id', ppv.id, 
               'productKey', ppv.product_key, 
               'productType', 'voice',
               'ui_elements', ppv.ui_elements
@@ -43,6 +46,7 @@ export async function GET() {
         (
           SELECT json_agg(
             json_build_object(
+              'relation_id', ppe.id, 
               'productKey', ppe.product_key, 
               'productType', 'equipment',
               'ui_elements', ppe.ui_elements
@@ -56,12 +60,12 @@ export async function GET() {
     `;
 
     // Combine all product types into a single products array
-    const formattedPromotions = promotions.map(p => {
+    const formattedPromotions = promotions.map((p) => {
       const products = [
         ...(p.internet_products || []),
         ...(p.tv_products || []),
         ...(p.voice_products || []),
-        ...(p.equipment_products || [])
+        ...(p.equipment_products || []),
       ];
 
       return {
@@ -71,7 +75,7 @@ export async function GET() {
         internet_products: undefined,
         tv_products: undefined,
         voice_products: undefined,
-        equipment_products: undefined
+        equipment_products: undefined,
       };
     });
 
@@ -154,28 +158,36 @@ export async function POST(request: Request) {
     if (products && products.length > 0) {
       for (const product of products) {
         switch (product.productType) {
-          case 'internet':
+          case "internet":
             await sql`
               INSERT INTO promotion_product_internet (promotion_key, product_key, ui_elements)
-              VALUES (${key}, ${product.productKey}, ${product.ui_elements || []})
+              VALUES (${key}, ${product.productKey}, ${
+              product.ui_elements || []
+            })
             `;
             break;
-          case 'tv':
+          case "tv":
             await sql`
               INSERT INTO promotion_product_tv (promotion_key, product_key, ui_elements)
-              VALUES (${key}, ${product.productKey}, ${product.ui_elements || []})
+              VALUES (${key}, ${product.productKey}, ${
+              product.ui_elements || []
+            })
             `;
             break;
-          case 'voice':
+          case "voice":
             await sql`
               INSERT INTO promotion_product_voice (promotion_key, product_key, ui_elements)
-              VALUES (${key}, ${product.productKey}, ${product.ui_elements || []})
+              VALUES (${key}, ${product.productKey}, ${
+              product.ui_elements || []
+            })
             `;
             break;
-          case 'equipment':
+          case "equipment":
             await sql`
               INSERT INTO promotion_product_equipment (promotion_key, product_key, ui_elements)
-              VALUES (${key}, ${product.productKey}, ${product.ui_elements || []})
+              VALUES (${key}, ${product.productKey}, ${
+              product.ui_elements || []
+            })
             `;
             break;
         }
