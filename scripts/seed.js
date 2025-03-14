@@ -110,7 +110,12 @@ const voiceProducts = [
   }
 ];
 
-const uiElements = [
+const uiElementTypes = [
+  {
+    key: 'package-header',
+    description: 'package_header of the product in the check avail module',
+    type: 'text'
+  },
   {
     key: 'cart-onetime-label',
     description: 'text added to one time bill section of the cart',
@@ -127,7 +132,7 @@ const uiElements = [
     type: 'text'
   },
   {
-    key: 'cart-footer-note-legal',
+    key: 'cart-footer-note-info',
     description: 'legal disclaimer added to a modal when clicking to "i" icon',
     type: 'text'
   },
@@ -153,27 +158,27 @@ const promotions = [
     products: [
       {
 					promokey: "2MF-2025",
-        product_key: 'P1GB',
+          product_key: 'P1GB',
 					productName: "Fiber GigaFast",
 					ui_elements: [
 						{
-							key: "package_header",
+							key: "package-header",
 							txt_text: "Limited Time Offer - 2 month free Internet"
 						},
 						{
-							key: "cart_oneTime_label",
+							key: "cart-onetime-label",
 							txt_text: "Enjoy 2 month of savings"
 						},
 						{
-							key: "cart_oneTime_price",
+							key: "cart-onetime-price",
 							txt_text: "2 month free"
 						},
 						{
-							key: "cart_footNote",
+							key: "cart-footer-note",
 							txt_text: "Enjoy 2 month of savings on Ultrafast or Gigafast Speeds:2 month free applied automatically after 90 days of service"
 						},
 						{
-							key: "cart_footNoteInfo",
+							key: "cart-footer-note-info",
 							txt_text: "Service subject to availability. For new residential customers only. Free offer of 1Gig internet service speeds applied as monthly bill credits in the amount of the monthly recurring charge, beginning in the fourth billing cycle, subject to good standing and no outstanding balance on the account. Taxes and other fees not included. Following the introductory period, the price will convert to the then current retail price for the applicable internet service. Actual internet speeds may vary; please see Breezeline's Network Management Disclosure at breezeline.com for details. "
 						}
 					]
@@ -182,7 +187,7 @@ const promotions = [
     markets: ['ohio-fiber-equal-speed', 'florida-fiber', 'fragile-fiber-sc'],
     ui_elements: [
 				{
-					key: "internetPage_banner",
+					key: "package-card-top-banner",
 					img_desktopImgUrl: "https://....",
 					img_mobileImgUrl: "https://....",
 					img_alt: "Upgrade to 1Gig and save!"
@@ -204,23 +209,23 @@ const promotions = [
         product_key: 'P1GB',
         ui_elements: [
 						{
-						key: "package_header",
+						key: "package-header",
 							txt_text: "Limited Time Offer - 1 month free Internet"
 						},
 						{
-							key: "cart_oneTime_label",
+							key: "cart-onetime-label",
 							txt_text: "Enjoy 1 month of savings"
 						},
 						{
-							key: "cart_oneTime_price",
+							key: "cart-onetime-price",
 							txt_text: "1 month free"
 						},
 						{
-							key: "cart_footNote",
+							key: "cart-footer-note",
 							txt_text: "Enjoy 1 month of savings on Ultrafast or Gigafast Speeds: 1 month free applied automatically after 90 days of service"
 						},
 						{
-							key: "cart_footNoteInfo",
+							key: "cart-footer-note-info",
 							txt_text: "Service subject to availability. For new residential customers only. Free offer of 500 Mbps or 1Gig internet service speeds applied as monthly bill credits in the amount of the monthly recurring charge, beginning in the fourth billing cycle, subject to good standing and no outstanding balance on the account. Taxes and other fees not included. Following the introductory period, the price will convert to the then current retail price for the applicable internet service. Actual internet speeds may vary; please see Breezeline's Network Management Disclosure at breezeline.com for details. "
 						}
         ]
@@ -229,23 +234,23 @@ const promotions = [
         product_key: 'P400',
         ui_elements: [
 						{
-						key: "package_header",
+						key: "package-header",
 							txt_text: "Limited Time Offer - 1 month free Internet"
 						},
 						{
-							key: "cart_oneTime_label",
+							key: "cart-onetime-label",
 							txt_text: "Enjoy 1 month of savings"
 						},
 						{
-							key: "cart_oneTime_price",
+							key: "cart-onetime-price",
 							txt_text: "1 month free"
 						},
 						{
-							key: "cart_footNote",
+							key: "cart-footer-note",
 							txt_text: "Enjoy 1 month of savings on Ultrafast or Gigafast Speeds: 1 month free applied automatically after 90 days of service"
 						},
 						{
-							key: "cart_footNoteInfo",
+							key: "cart-footer-note-info",
 							txt_text: "Service subject to availability. For new residential customers only. Free offer of 500 Mbps or 1Gig internet service speeds applied as monthly bill credits in the amount of the monthly recurring charge, beginning in the fourth billing cycle, subject to good standing and no outstanding balance on the account. Taxes and other fees not included. Following the introductory period, the price will convert to the then current retail price for the applicable internet service. Actual internet speeds may vary; please see Breezeline's Network Management Disclosure at breezeline.com for details. "
 						}
         ]
@@ -274,38 +279,10 @@ async function seed() {
     console.log('Starting database seeding...');
 
     // Clear existing data
-    await sql`TRUNCATE promotion_product_internet, promotion_product_tv, promotion_product_voice, promotion_product_equipment, promotion_market, markets, internet_products, channels, tv_products, voice_products, equipment, promotions, ui_element_types, market_internet_product, market_tv_product, market_voice_product CASCADE`;
+    await sql`TRUNCATE promotion_product_internet, promotion_product_tv, promotion_product_voice, promotion_product_equipment, promotion_market, promotion_ui_elements, product_association_ui_elements, ui_elements, markets, internet_products, channels, tv_products, voice_products, equipment, promotions, ui_element_types, market_internet_product, market_tv_product, market_voice_product CASCADE`;
     console.log('✓ Existing data cleared');
 
     // First rename the constant for clarity
-
-const uiElementTypes = [
-  {
-    key: 'cart-onetime-label',
-    description: 'text added to one time bill section of the cart',
-    type: 'text'
-  },
-  {
-    key: 'cart-onetime-price',
-    description: 'text display to one time bill section of the cart',
-    type: 'text'
-  },
-  {
-    key: 'cart-footer-note',
-    description: 'disclaimer added to cart footer',
-    type: 'text'
-  },
-  {
-    key: 'cart-footer-note-legal',
-    description: 'legal disclaimer added to a modal when clicking to "i" icon',
-    type: 'text'
-  },
-  {
-    key: 'package-card-top-banner',
-    description: 'Banner display on top of package cards',
-    type: 'image'
-  }
-];
 
     // Seed markets
     for (const market of markets) {
@@ -365,15 +342,6 @@ const uiElementTypes = [
     }
     console.log('✓ Voice products seeded');
 
-    // // Seed UI elements
-    // for (const element of uiElements) {
-    //   await sql`
-    //     INSERT INTO ui_elements (key, description, type)
-    //     VALUES (${element.key}, ${element.description}, ${element.type})
-    //   `;
-    // }
-    // console.log('✓ UI elements seeded');
-
     // Seed UI element types
     for (const elementType of uiElementTypes) {
       await sql`
@@ -385,10 +353,10 @@ const uiElementTypes = [
 
     // Seed promotions with relationships
     for (const promotion of promotions) {
-      // Insert base promotion
+      // Insert base promotion without ui_elements field
       await sql`
         INSERT INTO promotions (
-          key, name, start_date, end_date, triggers, ui_elements, display_order
+          key, name, start_date, end_date, triggers, display_order
         )
         VALUES (
           ${promotion.key},
@@ -396,10 +364,38 @@ const uiElementTypes = [
           ${promotion.start_date},
           ${promotion.end_date},
           ${promotion.triggers},
-          ${promotion.ui_elements},
           ${promotions.indexOf(promotion)}
         )
       `;
+      
+      // Insert UI elements for promotion
+      if (promotion.ui_elements && promotion.ui_elements.length > 0) {
+        for (const uiElement of promotion.ui_elements) {
+          // Insert the UI element
+          const result = await sql`
+            INSERT INTO ui_elements (
+              element_type, element_type_type, txt_text, img_desktopImgUrl, img_mobileImgUrl, img_alt
+            )
+            VALUES (
+              ${uiElement.key}, 
+              ${uiElement.key.includes('img_') ? 'image' : 'text'},
+              ${uiElement.txt_text || null},
+              ${uiElement.img_desktopImgUrl || null},
+              ${uiElement.img_mobileImgUrl || null},
+              ${uiElement.img_alt || null}
+            )
+            RETURNING id
+          `;
+          
+          const ui_element_id = result[0].id;
+          
+          // Create association between promotion and UI element
+          await sql`
+            INSERT INTO promotion_ui_elements (promotion_key, ui_element_id)
+            VALUES (${promotion.key}, ${ui_element_id})
+          `;
+        }
+      }
       
       // Insert market associations
       if (promotion.markets && promotion.markets.length > 0) {
@@ -414,31 +410,75 @@ const uiElementTypes = [
       // Insert product associations
       if (promotion.products && promotion.products.length > 0) {
         for (const product of promotion.products) {
+          let product_association_id;
+          let product_association_table;
+          
           // Determine product type and insert into appropriate join table
           if (product.product_key.startsWith('P')) {
-            // Assuming P prefix indicates internet product
-            await sql`
-              INSERT INTO promotion_product_internet (promotion_key, product_key, ui_elements)
-              VALUES (${promotion.key}, ${product.product_key}, ${product.ui_elements || []})
+            // Internet product
+            product_association_table = 'promotion_product_internet';
+            const result = await sql`
+              INSERT INTO promotion_product_internet (promotion_key, product_key)
+              VALUES (${promotion.key}, ${product.product_key})
+              RETURNING id
             `;
+            product_association_id = result[0].id;
           } else if (product.product_key.toLowerCase().includes('stream')) {
-            // Assuming TV product
-            await sql`
-              INSERT INTO promotion_product_tv (promotion_key, product_key, ui_elements)
-              VALUES (${promotion.key}, ${product.product_key}, ${product.ui_elements || []})
+            // TV product
+            product_association_table = 'promotion_product_tv';
+            const result = await sql`
+              INSERT INTO promotion_product_tv (promotion_key, product_key)
+              VALUES (${promotion.key}, ${product.product_key})
+              RETURNING id
             `;
+            product_association_id = result[0].id;
           } else if (product.product_key.toLowerCase().includes('voice')) {
-            // Assuming Voice product
-            await sql`
-              INSERT INTO promotion_product_voice (promotion_key, product_key, ui_elements)
-              VALUES (${promotion.key}, ${product.product_key}, ${product.ui_elements || []})
+            // Voice product
+            product_association_table = 'promotion_product_voice';
+            const result = await sql`
+              INSERT INTO promotion_product_voice (promotion_key, product_key)
+              VALUES (${promotion.key}, ${product.product_key})
+              RETURNING id
             `;
+            product_association_id = result[0].id;
           }
-          // If there were equipment associations, would handle those similarly
+          
+          // Insert UI elements for product association
+          if (product.ui_elements && product.ui_elements.length > 0 && product_association_id) {
+            for (const uiElement of product.ui_elements) {
+              // Insert the UI element
+              const result = await sql`
+                INSERT INTO ui_elements (
+                  element_type, element_type_type, txt_text, img_desktopImgUrl, img_mobileImgUrl, img_alt
+                )
+                VALUES (
+                  ${uiElement.key}, 
+                  ${uiElement.key.includes('img_') ? 'image' : 'text'},
+                  ${uiElement.txt_text || null},
+                  ${uiElement.img_desktopImgUrl || null},
+                  ${uiElement.img_mobileImgUrl || null},
+                  ${uiElement.img_alt || null}
+                )
+                RETURNING id
+              `;
+              
+              const ui_element_id = result[0].id;
+              
+              // Create association between product association and UI element
+              await sql`
+                INSERT INTO product_association_ui_elements (
+                  product_association_id, product_association_table, ui_element_id
+                )
+                VALUES (
+                  ${product_association_id}, ${product_association_table}, ${ui_element_id}
+                )
+              `;
+            }
+          }
         }
       }
     }
-    console.log('✓ Promotions and relationships seeded');
+    console.log('✓ Promotions, UI Elements and relationships seeded');
 
     console.log('Database seeding completed successfully!');
   } catch (error) {

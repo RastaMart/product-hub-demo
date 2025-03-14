@@ -16,9 +16,11 @@ async function migrate() {
     await sql`DROP TABLE IF EXISTS market_voice_product CASCADE`;
     await sql`DROP TABLE IF EXISTS market_tv_product CASCADE`;
     await sql`DROP TABLE IF EXISTS market_internet_product CASCADE`;
+    await sql`DROP TABLE IF EXISTS promotion_ui_elements CASCADE`;
+    await sql`DROP TABLE IF EXISTS product_association_ui_elements CASCADE`;
+    await sql`DROP TABLE IF EXISTS ui_elements CASCADE`;
     await sql`DROP TABLE IF EXISTS promotions CASCADE`;
     await sql`DROP TABLE IF EXISTS ui_element_types CASCADE`;
-    await sql`DROP TABLE IF EXISTS ui_elements CASCADE`;
     await sql`DROP TABLE IF EXISTS equipment CASCADE`;
     await sql`DROP TABLE IF EXISTS voice_products CASCADE`;
     await sql`DROP TABLE IF EXISTS tv_products CASCADE`;
@@ -154,7 +156,7 @@ async function migrate() {
     `;
     console.log('✓ Equipment table created');
 
-    // Create promotions table - remove products array as it's now in join tables
+    // Create promotions table - remove ui_elements JSONB array as it will now be in a join table
     await sql`
       CREATE TABLE IF NOT EXISTS promotions (
         key TEXT PRIMARY KEY,
@@ -162,7 +164,6 @@ async function migrate() {
         start_date TIMESTAMPTZ NOT NULL,
         end_date TIMESTAMPTZ NOT NULL,
         triggers JSONB[] NOT NULL DEFAULT '{}',
-        ui_elements JSONB[] NOT NULL DEFAULT '{}',
         display_order INTEGER NOT NULL DEFAULT 0
       )
     `;
@@ -238,10 +239,50 @@ async function migrate() {
       CREATE TABLE IF NOT EXISTS ui_element_types (
         key TEXT UNIQUE PRIMARY KEY,
         description TEXT,
-        type TEXT
+        type TEXT NOT NULL
       )
     `;
     console.log('✓ UI element types table created');
+
+    // Create ui_elements table
+    await sql`
+      CREATE TABLE IF NOT EXISTS ui_elements (
+        id SERIAL PRIMARY KEY,
+        element_type TEXT NOT NULL,
+        element_type_type TEXT NOT NULL,
+        txt_text TEXT,
+        img_desktopImgUrl TEXT,
+        img_mobileImgUrl TEXT,
+        img_alt TEXT,
+        FOREIGN KEY (element_type) REFERENCES ui_element_types(key) ON DELETE CASCADE
+      )
+    `;
+    console.log('✓ UI elements table created');
+
+    // Create promotion_ui_elements join table
+    await sql`
+      CREATE TABLE IF NOT EXISTS promotion_ui_elements (
+        promotion_key TEXT NOT NULL,
+        ui_element_id INTEGER NOT NULL,
+        PRIMARY KEY (promotion_key, ui_element_id),
+        FOREIGN KEY (promotion_key) REFERENCES promotions(key) ON DELETE CASCADE,
+        FOREIGN KEY (ui_element_id) REFERENCES ui_elements(id) ON DELETE CASCADE
+      )
+    `;
+    console.log('✓ Promotion-UI Element join table created');
+
+    // Modify product association tables to remove JSONB arrays for ui_elements
+    // Create product_association_ui_elements join table
+    await sql`
+      CREATE TABLE IF NOT EXISTS product_association_ui_elements (
+        product_association_id INTEGER NOT NULL,
+        product_association_table TEXT NOT NULL,
+        ui_element_id INTEGER NOT NULL,
+        PRIMARY KEY (product_association_id, product_association_table, ui_element_id),
+        FOREIGN KEY (ui_element_id) REFERENCES ui_elements(id) ON DELETE CASCADE
+      )
+    `;
+    console.log('✓ Product Association-UI Element join table created');
 
     console.log('Migration completed successfully!');
   } catch (error) {

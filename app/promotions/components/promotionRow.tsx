@@ -131,7 +131,7 @@ export function PromotionRow({
         </TableCell>
         <TableCell>
           <div className="flex flex-wrap gap-1">
-            {promotion.ui_elements.map(({ key }) => (
+            {promotion.ui_elements?.map(({ key }) => (
               <span
                 key={key}
                 className="px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700"

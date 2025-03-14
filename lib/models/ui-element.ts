@@ -1,6 +1,6 @@
 // Change from:
 export interface UIElement {
-  id?: number;
+  id: number;
   key: string;
   txt_text?: string;
   img_desktopImgUrl?: string;
