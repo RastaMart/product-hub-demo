@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Promotion, UIElement } from '@/lib/models/promotion';
-import { Market } from '@/lib/models/market';
-import { InternetProduct } from '@/lib/models/internet';
-import { TVProduct } from '@/lib/models/tv';
-import { VoiceProduct } from '@/lib/models/voice';
-import { Equipment } from '@/lib/models/equipment';
-import { useData } from '@/lib/hooks/use-data';
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
+import { useState, useEffect } from "react";
+import { Promotion, UIElement } from "@/lib/models/promotion";
+import { Market } from "@/lib/models/market";
+import { InternetProduct } from "@/lib/models/internet";
+import { TVProduct } from "@/lib/models/tv";
+import { VoiceProduct } from "@/lib/models/voice";
+import { Equipment } from "@/lib/models/equipment";
+import { useData } from "@/lib/hooks/use-data";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 import {
   Table,
   TableBody,
@@ -17,7 +17,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from "@/components/ui/table";
 import {
   Plus,
   Link as LinkIcon,
@@ -25,8 +25,8 @@ import {
   GripVertical,
   ChevronDown,
   ChevronRight,
-} from 'lucide-react';
-import { format } from 'date-fns';
+} from "lucide-react";
+import { format } from "date-fns";
 import {
   DndContext,
   closestCenter,
@@ -35,18 +35,18 @@ import {
   useSensor,
   useSensors,
   DragEndEvent,
-} from '@dnd-kit/core';
+} from "@dnd-kit/core";
 import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
   verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { CreatePromotionModal } from '.././components/create-promotion-modal';
-import { AssociationModal } from '.././components/association-modal';
-import { UIElementModal } from '.././components/ui-element-modal';
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { CreatePromotionModal } from ".././components/create-promotion-modal";
+import { AssociationModal } from ".././components/association-modal";
+import { UIElementModal } from ".././components/ui-element-modal";
 
 interface SortableRowProps {
   promotion: {
@@ -89,14 +89,13 @@ function SortableRow({
     transform: CSS.Transform.toString(transform),
     transition,
     zIndex: isDragging ? 1 : 0,
-    position: isDragging ? 'relative' : 'static',
-    backgroundColor: isDragging ? 'white' : undefined,
+    position: isDragging ? "relative" : "static",
+    backgroundColor: isDragging ? "white" : undefined,
   } as React.CSSProperties;
-
 
   const getProductName = (productKey: string) => {
     const product = allProducts.find((p) =>
-      'key' in p ? p.key === productKey : p.key === productKey
+      "key" in p ? p.key === productKey : p.key === productKey
     );
     return product ? product.name : productKey;
   };
@@ -133,15 +132,15 @@ function SortableRow({
               ) : (
                 <ChevronRight className="h-4 w-4" />
               )}
-            <span className="font-medium">{promotion.name}</span>
+              <span className="font-medium">{promotion.name}</span>
             </Button>
           </div>
         </TableCell>
         <TableCell>
           <div className="text-sm">
-            <div>{format(startDate, 'MMM d, yyyy')}</div>
+            <div>{format(startDate, "MMM d, yyyy")}</div>
             <div className="text-gray-500">
-              {format(endDate, 'MMM d, yyyy')}
+              {format(endDate, "MMM d, yyyy")}
             </div>
           </div>
         </TableCell>
@@ -243,7 +242,7 @@ function SortableRow({
               <div>
                 <h4 className="text-sm font-medium mb-2">Associated Markets</h4>
                 <div className="grid grid-cols-3 gap-2">
-                  {promotion.markets.map((marketId) => (
+                  {promotion.markets?.map((marketId) => (
                     <div
                       key={marketId}
                       className="p-2 rounded-lg bg-white border"
@@ -263,18 +262,18 @@ function SortableRow({
 
 export default function PromotionsPage() {
   const [isClient, setIsClient] = useState(false);
-  const { data: fetchedPromotions = [] } = useData<any>('/api/promotions');
+  const { data: fetchedPromotions = [] } = useData<any>("/api/promotions");
   const [promotions, setPromotions] = useState<any[]>([]);
-  const { data: markets = [] } = useData<Market>('/api/markets');
+  const { data: markets = [] } = useData<Market>("/api/markets");
   const { data: internetProducts = [] } = useData<InternetProduct>(
-    '/api/products/internet'
+    "/api/products/internet"
   );
-  const { data: tvProducts = [] } = useData<TVProduct>('/api/products/tv');
+  const { data: tvProducts = [] } = useData<TVProduct>("/api/products/tv");
   const { data: voiceProducts = [] } = useData<VoiceProduct>(
-    '/api/products/voice'
+    "/api/products/voice"
   );
   const { data: equipment = [] } = useData<Equipment>(
-    '/api/products/equipment'
+    "/api/products/equipment"
   );
   const [isOpen, setIsOpen] = useState(false);
   const [isAssociationOpen, setIsAssociationOpen] = useState(false);
@@ -310,9 +309,9 @@ export default function PromotionsPage() {
       // Update local state
       setPromotions((items) => {
         // Find the indexes of the dragged item and the drop target
-        const activeIndex = items.findIndex(item => item.key === active.id);
-        const overIndex = items.findIndex(item => item.key === over.id);
-        
+        const activeIndex = items.findIndex((item) => item.key === active.id);
+        const overIndex = items.findIndex((item) => item.key === over.id);
+
         // Return the reordered array
         return arrayMove(items, activeIndex, overIndex);
       });
@@ -320,37 +319,45 @@ export default function PromotionsPage() {
       try {
         // Get the updated promotions after state update
         const updatedPromotions = [...promotions];
-        const activeIndex = updatedPromotions.findIndex(item => item.key === active.id);
-        const overIndex = updatedPromotions.findIndex(item => item.key === over.id);
-        const reorderedPromotions = arrayMove(updatedPromotions, activeIndex, overIndex);
+        const activeIndex = updatedPromotions.findIndex(
+          (item) => item.key === active.id
+        );
+        const overIndex = updatedPromotions.findIndex(
+          (item) => item.key === over.id
+        );
+        const reorderedPromotions = arrayMove(
+          updatedPromotions,
+          activeIndex,
+          overIndex
+        );
 
         // Save to the database
-        const response = await fetch('/api/promotions/reorder', {
-          method: 'POST',
+        const response = await fetch("/api/promotions/reorder", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            promotions: reorderedPromotions.map(p => ({ key: p.key }))
+            promotions: reorderedPromotions.map((p) => ({ key: p.key })),
           }),
         });
 
         if (!response.ok) {
-          throw new Error('Failed to update promotion order');
+          throw new Error("Failed to update promotion order");
         }
 
         toast({
-          title: 'Success',
-          description: 'Promotion order updated successfully',
+          title: "Success",
+          description: "Promotion order updated successfully",
         });
       } catch (error) {
-        console.error('Failed to update promotion order:', error);
+        console.error("Failed to update promotion order:", error);
         toast({
-          title: 'Error',
-          description: 'Failed to update promotion order',
-          variant: 'destructive',
+          title: "Error",
+          description: "Failed to update promotion order",
+          variant: "destructive",
         });
-        
+
         // If API call fails, revert to the original order by refetching
         // Alternatively, you could keep track of the previous order and revert to it
         window.location.reload();
@@ -360,10 +367,10 @@ export default function PromotionsPage() {
 
   const handleCreatePromotion = async (newPromotion: Partial<Promotion>) => {
     try {
-      const response = await fetch('/api/promotions', {
-        method: 'POST',
+      const response = await fetch("/api/promotions", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           name: newPromotion.name,
@@ -379,39 +386,42 @@ export default function PromotionsPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to create promotion');
+        throw new Error(data.error || "Failed to create promotion");
       }
 
       toast({
-        title: 'Success',
-        description: 'Promotion created successfully',
+        title: "Success",
+        description: "Promotion created successfully",
       });
 
       // Refresh the page to get updated data
       window.location.reload();
     } catch (error) {
-      console.error('Failed to create promotion:', error);
+      console.error("Failed to create promotion:", error);
       toast({
-        title: 'Error',
+        title: "Error",
         description:
-          error instanceof Error ? error.message : 'Failed to create promotion',
-        variant: 'destructive',
+          error instanceof Error ? error.message : "Failed to create promotion",
+        variant: "destructive",
       });
     }
 
     setIsOpen(false);
   };
 
-  const handleProductAssociation = async (promotion: any, productKey: string) => {
+  const handleProductAssociation = async (
+    promotion: any,
+    productKey: string
+  ) => {
     // This function now just updates the local state to reflect changes made directly
     // in the AssociationModal component
-    const product = allProducts.find(p => {
-      if ('key' in p) {
+    const product = allProducts.find((p) => {
+      if ("key" in p) {
         return p.key === productKey;
       }
       return p.id === productKey;
     });
-    
+
     if (!product) {
       toast({
         title: "Error",
@@ -420,23 +430,25 @@ export default function PromotionsPage() {
       });
       return;
     }
-  
+
     const productType = product.type.toLowerCase();
-    
+
     // Check if product is already associated to toggle it
     const isCurrentlyAssociated = promotion.products?.some(
       (p: any) => p.productKey === productKey
     );
-    
+
     // Update local state to reflect the toggle
-    setPromotions(currentPromotions => {
-      return currentPromotions.map(p => {
+    setPromotions((currentPromotions) => {
+      return currentPromotions.map((p) => {
         if (p.key === promotion.key) {
           if (isCurrentlyAssociated) {
             // Remove the product
             return {
               ...p,
-              products: p.products.filter((prod: any) => prod.productKey !== productKey)
+              products: p.products.filter(
+                (prod: any) => prod.productKey !== productKey
+              ),
             };
           } else {
             // Add the product
@@ -444,15 +456,15 @@ export default function PromotionsPage() {
               ...p,
               products: [
                 ...(p.products || []),
-                { productKey, productType, ui_elements: [] }
-              ]
+                { productKey, productType, ui_elements: [] },
+              ],
             };
           }
         }
         return p;
       });
     });
-    
+
     // Update selectedPromotion if it's the current one
     if (selectedPromotion?.key === promotion.key) {
       if (isCurrentlyAssociated) {
@@ -460,60 +472,62 @@ export default function PromotionsPage() {
           ...selectedPromotion,
           products: selectedPromotion.products.filter(
             (p: any) => p.productKey !== productKey
-          )
+          ),
         });
       } else {
         setSelectedPromotion({
           ...selectedPromotion,
           products: [
             ...(selectedPromotion.products || []),
-            { productKey, productType, ui_elements: [] }
-          ]
+            { productKey, productType, ui_elements: [] },
+          ],
         });
       }
     }
   };
-  
+
   const handleMarketAssociation = async (promotion: any, marketId: string) => {
     // This function now just updates the local state to reflect changes made directly
     // in the AssociationModal component
-    
+
     // Check if market is already associated to toggle it
     const isCurrentlyAssociated = promotion.markets?.includes(marketId);
-    
+
     // Update local state to reflect the toggle
-    setPromotions(currentPromotions => {
-      return currentPromotions.map(p => {
+    setPromotions((currentPromotions) => {
+      return currentPromotions.map((p) => {
         if (p.key === promotion.key) {
           if (isCurrentlyAssociated) {
             // Remove the market
             return {
               ...p,
-              markets: p.markets.filter((id: string) => id !== marketId)
+              markets: p.markets.filter((id: string) => id !== marketId),
             };
           } else {
             // Add the market
             return {
               ...p,
-              markets: [...(p.markets || []), marketId]
+              markets: [...(p.markets || []), marketId],
             };
           }
         }
         return p;
       });
     });
-    
+
     // Update selectedPromotion if it's the current one
     if (selectedPromotion?.key === promotion.key) {
       if (isCurrentlyAssociated) {
         setSelectedPromotion({
           ...selectedPromotion,
-          markets: selectedPromotion.markets.filter((id: string) => id !== marketId)
+          markets: selectedPromotion.markets.filter(
+            (id: string) => id !== marketId
+          ),
         });
       } else {
         setSelectedPromotion({
           ...selectedPromotion,
-          markets: [...(selectedPromotion.markets || []), marketId]
+          markets: [...(selectedPromotion.markets || []), marketId],
         });
       }
     }
@@ -551,10 +565,10 @@ export default function PromotionsPage() {
   const currentPromotions = promotions.slice(startIndex, endIndex);
 
   const allProducts = [
-    ...internetProducts.map((p) => ({ ...p, type: 'Internet' })),
-    ...tvProducts.map((p) => ({ ...p, type: 'TV' })),
-    ...voiceProducts.map((p) => ({ ...p, type: 'Voice' })),
-    ...equipment.map((p) => ({ ...p, type: 'Equipment' })),
+    ...internetProducts.map((p) => ({ ...p, type: "Internet" })),
+    ...tvProducts.map((p) => ({ ...p, type: "TV" })),
+    ...voiceProducts.map((p) => ({ ...p, type: "Voice" })),
+    ...equipment.map((p) => ({ ...p, type: "Equipment" })),
   ];
 
   if (!isClient) {
@@ -593,23 +607,24 @@ export default function PromotionsPage() {
             </TableHeader>
             <TableBody>
               <SortableContext
-                items={currentPromotions.map(item => item.key)}
+                items={currentPromotions.map((item) => item.key)}
                 strategy={verticalListSortingStrategy}
               >
                 {currentPromotions.map((promotion) => {
                   const isExpanded = expandedRows.includes(promotion.key);
                   return (
-                  <SortableRow
-                    key={promotion.key}
-                    promotion={promotion}
-                    onAssociate={openAssociationModal}
-                    onConfigureUI={openUIElementModal}
-                    isExpanded={isExpanded}
-                    onToggleExpand={toggleExpand}
-                    allProducts={allProducts}
-                    markets={markets}
-                  />
-                );})}
+                    <SortableRow
+                      key={promotion.key}
+                      promotion={promotion}
+                      onAssociate={openAssociationModal}
+                      onConfigureUI={openUIElementModal}
+                      isExpanded={isExpanded}
+                      onToggleExpand={toggleExpand}
+                      allProducts={allProducts}
+                      markets={markets}
+                    />
+                  );
+                })}
               </SortableContext>
             </TableBody>
           </Table>
@@ -617,7 +632,7 @@ export default function PromotionsPage() {
 
         <div className="flex items-center justify-between p-4 border-t">
           <div className="text-sm text-gray-500">
-            Showing {startIndex + 1} to {Math.min(endIndex, promotions.length)}{' '}
+            Showing {startIndex + 1} to {Math.min(endIndex, promotions.length)}{" "}
             of {promotions.length} promotions
           </div>
           <div className="flex gap-2">
