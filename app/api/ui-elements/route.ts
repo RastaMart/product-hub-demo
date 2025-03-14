@@ -3,9 +3,11 @@ import sql from "@/lib/db";
 
 export async function GET() {
   try {
-    const uiElementTypes = await sql`SELECT * FROM ui_element_types`;
+    const uiElementTypes =
+      await sql`SELECT * FROM ui_element_types ORDER BY key ASC`;
     return Response.json(uiElementTypes);
   } catch (error) {
+    console.error("Failed to load UI element types:", error);
     return Response.json(
       { error: "Failed to load UI element types" },
       { status: 500 }
@@ -35,7 +37,7 @@ export async function POST(request: Request) {
 
     // Check if key already exists
     const existing = await sql`
-      SELECT key FROM ui_elements WHERE key = ${key}
+      SELECT key FROM ui_element_types WHERE key = ${key}
     `;
 
     if (existing.length > 0) {
@@ -45,9 +47,9 @@ export async function POST(request: Request) {
       );
     }
 
-    // Insert new UI element
+    // Insert new UI element type
     await sql`
-      INSERT INTO ui_elements (key, description, type)
+      INSERT INTO ui_element_types (key, description, type)
       VALUES (${key}, ${description}, ${type})
     `;
 
@@ -56,9 +58,9 @@ export async function POST(request: Request) {
       data: { key, description, type },
     });
   } catch (error) {
-    console.error("Failed to create UI element:", error);
+    console.error("Failed to create UI element type:", error);
     return NextResponse.json(
-      { error: "Failed to create UI element" },
+      { error: "Failed to create UI element type" },
       { status: 500 }
     );
   }

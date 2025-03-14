@@ -402,12 +402,14 @@ export default function PromotionsPage() {
   };
 
   const openUIElementModal = (promotion: any) => {
+    console.log("Opening UI element modal for promotion", promotion);
     setSelectedPromotion(promotion);
     setIsUIElementOpen(true);
   };
 
   const handleAddUIElement = (element: UIElement) => {
-    console.log("Adding UI element", element);
+    console.log("Adding UI element", element, selectedPromotion);
+    const { key: promotionKey, selectedProductKey } = selectedPromotion;
     // TODO: Add API call to add UI element to promotion
   };
 
