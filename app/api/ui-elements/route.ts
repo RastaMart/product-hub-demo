@@ -1,14 +1,13 @@
-import { NextResponse } from 'next/server';
-import sql from '@/lib/db';
+import { NextResponse } from "next/server";
+import sql from "@/lib/db";
 
 export async function GET() {
   try {
-    const elements = await sql`SELECT * FROM ui_elements ORDER BY key`;
-    return NextResponse.json(elements);
+    const uiElementTypes = await sql`SELECT * FROM ui_element_types`;
+    return Response.json(uiElementTypes);
   } catch (error) {
-    console.error('Failed to fetch UI elements:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch UI elements' },
+    return Response.json(
+      { error: "Failed to load UI element types" },
       { status: 500 }
     );
   }
@@ -21,13 +20,13 @@ export async function POST(request: Request) {
     // Validate input
     if (!key || !description || !type) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: "Missing required fields" },
         { status: 400 }
       );
     }
 
     // Check if type is valid
-    if (!['text', 'image'].includes(type)) {
+    if (!["text", "image"].includes(type)) {
       return NextResponse.json(
         { error: 'Invalid type. Must be "text" or "image"' },
         { status: 400 }
@@ -41,7 +40,7 @@ export async function POST(request: Request) {
 
     if (existing.length > 0) {
       return NextResponse.json(
-        { error: 'UI element with this key already exists' },
+        { error: "UI element with this key already exists" },
         { status: 409 }
       );
     }
@@ -57,9 +56,9 @@ export async function POST(request: Request) {
       data: { key, description, type },
     });
   } catch (error) {
-    console.error('Failed to create UI element:', error);
+    console.error("Failed to create UI element:", error);
     return NextResponse.json(
-      { error: 'Failed to create UI element' },
+      { error: "Failed to create UI element" },
       { status: 500 }
     );
   }

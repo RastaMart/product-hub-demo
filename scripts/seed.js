@@ -274,37 +274,38 @@ async function seed() {
     console.log('Starting database seeding...');
 
     // Clear existing data
-    await sql`TRUNCATE promotion_product_internet, promotion_product_tv, promotion_product_voice, promotion_product_equipment, promotion_market, markets, internet_products, channels, tv_products, voice_products, equipment, promotions, ui_elements, market_internet_product, market_tv_product, market_voice_product CASCADE`;
+    await sql`TRUNCATE promotion_product_internet, promotion_product_tv, promotion_product_voice, promotion_product_equipment, promotion_market, markets, internet_products, channels, tv_products, voice_products, equipment, promotions, ui_element_types, market_internet_product, market_tv_product, market_voice_product CASCADE`;
     console.log('✓ Existing data cleared');
 
-// export const uiKeyList: UIElementTypes[] = [
-//   {
-//     key: "cart-onetime-label",
-//     description: "text added to one time bill section of the cart",
-//     type: "text",
-//   },
-//   {
-//     key: "cart-onetime-price",
-//     description: "text display to one time bill section of the cart",
-//     type: "text",
-//   },
-//   {
-//     key: "cart-footer-note",
-//     description: "disclaimer added to cart footer",
-//     type: "text",
-//   },
-//   {
-//     key: "cart-footer-note-legal",
-//     description: 'legal disclaimer added to a modal when clicking to "i" icon',
-//     type: "text",
-//   },
-//   {
-//     key: "package-card-top-banner",
-//     description: "Banner display on top of package cards",
-//     type: "image",
-//   },
-// ];
+    // First rename the constant for clarity
 
+const uiElementTypes = [
+  {
+    key: 'cart-onetime-label',
+    description: 'text added to one time bill section of the cart',
+    type: 'text'
+  },
+  {
+    key: 'cart-onetime-price',
+    description: 'text display to one time bill section of the cart',
+    type: 'text'
+  },
+  {
+    key: 'cart-footer-note',
+    description: 'disclaimer added to cart footer',
+    type: 'text'
+  },
+  {
+    key: 'cart-footer-note-legal',
+    description: 'legal disclaimer added to a modal when clicking to "i" icon',
+    type: 'text'
+  },
+  {
+    key: 'package-card-top-banner',
+    description: 'Banner display on top of package cards',
+    type: 'image'
+  }
+];
 
     // Seed markets
     for (const market of markets) {
@@ -364,14 +365,23 @@ async function seed() {
     }
     console.log('✓ Voice products seeded');
 
-    // Seed UI elements
-    for (const element of uiElements) {
+    // // Seed UI elements
+    // for (const element of uiElements) {
+    //   await sql`
+    //     INSERT INTO ui_elements (key, description, type)
+    //     VALUES (${element.key}, ${element.description}, ${element.type})
+    //   `;
+    // }
+    // console.log('✓ UI elements seeded');
+
+    // Seed UI element types
+    for (const elementType of uiElementTypes) {
       await sql`
-        INSERT INTO ui_elements (key, description, type)
-        VALUES (${element.key}, ${element.description}, ${element.type})
+        INSERT INTO ui_element_types (key, description, type)
+        VALUES (${elementType.key}, ${elementType.description}, ${elementType.type})
       `;
     }
-    console.log('✓ UI elements seeded');
+    console.log('✓ UI element types seeded');
 
     // Seed promotions with relationships
     for (const promotion of promotions) {

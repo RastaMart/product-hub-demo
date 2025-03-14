@@ -17,6 +17,7 @@ async function migrate() {
     await sql`DROP TABLE IF EXISTS market_tv_product CASCADE`;
     await sql`DROP TABLE IF EXISTS market_internet_product CASCADE`;
     await sql`DROP TABLE IF EXISTS promotions CASCADE`;
+    await sql`DROP TABLE IF EXISTS ui_element_types CASCADE`;
     await sql`DROP TABLE IF EXISTS ui_elements CASCADE`;
     await sql`DROP TABLE IF EXISTS equipment CASCADE`;
     await sql`DROP TABLE IF EXISTS voice_products CASCADE`;
@@ -232,15 +233,15 @@ async function migrate() {
     `;
     console.log('✓ Promotion-Equipment join table created');
 
-    // Create ui_elements table
+    // Create ui_element_types table
     await sql`
-      CREATE TABLE IF NOT EXISTS ui_elements (
-        key TEXT PRIMARY KEY,
-        description TEXT NOT NULL,
-        type TEXT NOT NULL CHECK (type IN ('text', 'image'))
+      CREATE TABLE IF NOT EXISTS ui_element_types (
+        key TEXT UNIQUE PRIMARY KEY,
+        description TEXT,
+        type TEXT
       )
     `;
-    console.log('✓ UI elements table created');
+    console.log('✓ UI element types table created');
 
     console.log('Migration completed successfully!');
   } catch (error) {

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Promotion, UIElement } from "@/lib/models/promotion";
 import { UIKeyDefinition, uiKeyList } from "@/lib/models/ui-keys";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +18,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useData } from "@/lib/hooks/use-data";
+import { UIElement, UIElementType } from "@/lib/models/ui-element";
 
 interface UIElementModalProps {
   isOpen: boolean;
