@@ -407,10 +407,12 @@ export default function PromotionsPage() {
   };
 
   const handleAddUIElement = (element: UIElement) => {
+    console.log("Adding UI element", element);
     // TODO: Add API call to add UI element to promotion
   };
 
   const handleRemoveUIElement = (elementKey: string) => {
+    console.log("Removing UI element", elementKey);
     // TODO: Add API call to remove UI element from promotion
   };
 
@@ -542,9 +544,7 @@ export default function PromotionsPage() {
       <UIElementModal
         isOpen={isUIElementOpen}
         onOpenChange={setIsUIElementOpen}
-        selectedPromotion={selectedPromotion}
         onAddUIElement={handleAddUIElement}
-        onRemoveUIElement={handleRemoveUIElement}
       />
     </div>
   );

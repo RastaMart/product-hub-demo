@@ -1,8 +1,8 @@
 "use client";
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 import { useState } from "react";
-import { UIKeyDefinition } from "@/lib/models/ui-keys";
+import { UIKeyDefinition } from "@/lib/models/ui_elementType";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -32,10 +32,11 @@ import { useData } from "@/lib/hooks/use-data";
 import { useToast } from "@/hooks/use-toast";
 
 export default function ConfigsPage() {
-  const { data: elements = [], loading } = useData<UIKeyDefinition>('/api/ui-elements');
+  const { data: elements = [], loading } =
+    useData<UIKeyDefinition>("/api/ui-elements");
   const [isOpen, setIsOpen] = useState(false);
   const [newElement, setNewElement] = useState<Partial<UIKeyDefinition>>({
-    type: "text"
+    type: "text",
   });
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -45,11 +46,11 @@ export default function ConfigsPage() {
 
     setIsSubmitting(true);
     try {
-      console.log('newElement', newElement);
-      const response = await fetch('/api/ui-elements', {
-        method: 'POST',
+      console.log("newElement", newElement);
+      const response = await fetch("/api/ui-elements", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(newElement),
       });
@@ -57,7 +58,7 @@ export default function ConfigsPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to create UI element');
+        throw new Error(data.error || "Failed to create UI element");
       }
 
       // Close modal and reset form
@@ -73,10 +74,13 @@ export default function ConfigsPage() {
       // Refresh the page to get updated data
       window.location.reload();
     } catch (error) {
-      console.error('Failed to create UI element:', error);
+      console.error("Failed to create UI element:", error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to create UI element type",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to create UI element type",
         variant: "destructive",
       });
     } finally {
@@ -87,11 +91,11 @@ export default function ConfigsPage() {
   const handleRemoveElement = async (key: string) => {
     try {
       const response = await fetch(`/api/ui-elements/${key}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
 
       if (!response.ok) {
-        throw new Error('Failed to delete UI element');
+        throw new Error("Failed to delete UI element");
       }
 
       // Show success toast
@@ -103,7 +107,7 @@ export default function ConfigsPage() {
       // Refresh the page to get updated data
       window.location.reload();
     } catch (error) {
-      console.error('Failed to delete UI element:', error);
+      console.error("Failed to delete UI element:", error);
       toast({
         title: "Error",
         description: "Failed to delete UI element type",
@@ -135,7 +139,7 @@ export default function ConfigsPage() {
               <div className="space-y-2">
                 <label className="text-sm font-medium">Key</label>
                 <Input
-                  value={newElement.key || ''}
+                  value={newElement.key || ""}
                   onChange={(e) =>
                     setNewElement({ ...newElement, key: e.target.value })
                   }
@@ -145,9 +149,12 @@ export default function ConfigsPage() {
               <div className="space-y-2">
                 <label className="text-sm font-medium">Description</label>
                 <Input
-                  value={newElement.description || ''}
+                  value={newElement.description || ""}
                   onChange={(e) =>
-                    setNewElement({ ...newElement, description: e.target.value })
+                    setNewElement({
+                      ...newElement,
+                      description: e.target.value,
+                    })
                   }
                   placeholder="Text displayed in the cart header"
                 />
@@ -171,7 +178,9 @@ export default function ConfigsPage() {
               </div>
               <Button
                 onClick={handleCreateElement}
-                disabled={!newElement.key || !newElement.description || isSubmitting}
+                disabled={
+                  !newElement.key || !newElement.description || isSubmitting
+                }
                 className="w-full bg-[#1a237e] hover:bg-[#1a237e]/90"
               >
                 {isSubmitting ? "Creating..." : "Create UI Element Type"}
@@ -197,11 +206,13 @@ export default function ConfigsPage() {
                 <TableCell className="font-medium">{element.key}</TableCell>
                 <TableCell>{element.description}</TableCell>
                 <TableCell>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    element.type === "text" 
-                      ? "bg-blue-100 text-blue-700"
-                      : "bg-purple-100 text-purple-700"
-                  }`}>
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      element.type === "text"
+                        ? "bg-blue-100 text-blue-700"
+                        : "bg-purple-100 text-purple-700"
+                    }`}
+                  >
                     {element.type}
                   </span>
                 </TableCell>

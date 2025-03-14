@@ -277,6 +277,35 @@ async function seed() {
     await sql`TRUNCATE promotion_product_internet, promotion_product_tv, promotion_product_voice, promotion_product_equipment, promotion_market, markets, internet_products, channels, tv_products, voice_products, equipment, promotions, ui_elements, market_internet_product, market_tv_product, market_voice_product CASCADE`;
     console.log('✓ Existing data cleared');
 
+// export const uiKeyList: UIElementTypes[] = [
+//   {
+//     key: "cart-onetime-label",
+//     description: "text added to one time bill section of the cart",
+//     type: "text",
+//   },
+//   {
+//     key: "cart-onetime-price",
+//     description: "text display to one time bill section of the cart",
+//     type: "text",
+//   },
+//   {
+//     key: "cart-footer-note",
+//     description: "disclaimer added to cart footer",
+//     type: "text",
+//   },
+//   {
+//     key: "cart-footer-note-legal",
+//     description: 'legal disclaimer added to a modal when clicking to "i" icon',
+//     type: "text",
+//   },
+//   {
+//     key: "package-card-top-banner",
+//     description: "Banner display on top of package cards",
+//     type: "image",
+//   },
+// ];
+
+
     // Seed markets
     for (const market of markets) {
       await sql`

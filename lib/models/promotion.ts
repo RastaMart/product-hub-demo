@@ -1,8 +1,8 @@
 export interface UIElement {
   key: string;
-  type: 'text' | 'image';
+  type: "text" | "image";
   description?: string;
-  value?: string;
+  txt_text?: string;
   img_desktopImgUrl?: string;
   img_mobileImgUrl?: string;
   img_alt?: string;
@@ -12,7 +12,7 @@ export interface ProductAssociation {
   id?: number;
   promotionKey: string;
   productKey: string;
-  productType: 'internet' | 'tv' | 'voice' | 'equipment';
+  productType: "internet" | "tv" | "voice" | "equipment";
   ui_elements: UIElement[];
 }
 
@@ -36,7 +36,7 @@ export interface Promotion {
   triggers?: TriggerConfig[];
   ui_elements?: UIElement[];
   display_order: number;
-  
+
   // Relations - these would be populated by your API when needed
   productAssociations?: ProductAssociation[];
   marketAssociations?: MarketAssociation[];

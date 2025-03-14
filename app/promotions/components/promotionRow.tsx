@@ -8,7 +8,9 @@ import {
   GripVertical,
   Settings2,
   LinkIcon,
+  Plus,
 } from "lucide-react";
+import { ProductAssociation } from "@/lib/models/promotion";
 
 interface PromotionRowProps {
   promotion: {
@@ -18,7 +20,7 @@ interface PromotionRowProps {
     end_date: string;
     triggers: any[];
     ui_elements: any[];
-    products: any[];
+    products: ProductAssociation[];
     markets: string[];
   };
   isExpanded: boolean;
@@ -129,12 +131,15 @@ export function PromotionRow({
         </TableCell>
         <TableCell>
           <div className="flex flex-wrap gap-1">
-            {promotion.ui_elements.map((element) => (
+            {promotion.ui_elements.map(({ key }) => (
               <span
-                key={element.key}
+                key={key}
                 className="px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700"
               >
-                {element.key}
+                {key}
+                {/* <Button onClick={() => handleRemoveUIElement("promotion", key)}>
+                  X
+                </Button> */}
               </span>
             ))}
           </div>
@@ -184,14 +189,45 @@ export function PromotionRow({
                       </p>
                       {pkg.ui_elements.length > 0 && (
                         <div className="mt-1 flex flex-wrap gap-1">
-                          {pkg.ui_elements.map(({ ui_elementKey }) => (
+                          {pkg.ui_elements.map(({ key }) => (
                             <span
-                              key={ui_elementKey}
+                              key={key}
                               className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700"
                             >
-                              {ui_elementKey}
+                              {key}
                             </span>
                           ))}
+
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="px-2 py-0 h-6 rounded-full text-xs font-medium bg-gray-100 text-gray-700 hover:bg-gray-200"
+                            onClick={() =>
+                              onConfigureUI({
+                                ...promotion,
+                                selectedProductKey: pkg.productKey,
+                              })
+                            }
+                          >
+                            <Plus className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      )}
+                      {pkg.ui_elements.length === 0 && (
+                        <div className="mt-1">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="px-2 py-0 h-6 rounded-full text-xs font-medium bg-gray-100 text-gray-700 hover:bg-gray-200"
+                            onClick={() =>
+                              onConfigureUI({
+                                ...promotion,
+                                selectedProductKey: pkg.productKey,
+                              })
+                            }
+                          >
+                            <Plus className="h-3 w-3 mr-1" /> Add UI Element
+                          </Button>
                         </div>
                       )}
                     </div>
