@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Promotion, UIElement } from "@/lib/models/promotion";
+import { Promotion } from "@/lib/models/promotion";
 import { Market } from "@/lib/models/market";
 import { InternetProduct } from "@/lib/models/internet";
 import { TVProduct } from "@/lib/models/tv";
@@ -51,6 +51,7 @@ import { ProductAssociationModal } from ".././components/product-association-mod
 import { MarketAssociationModal } from ".././components/market-association-modal";
 import { UIElementModal } from ".././components/ui-element-modal";
 import { PromotionRow } from ".././components/promotionRow";
+import { UIElement } from "@/lib/models/ui-element";
 
 interface NewUIElementContext {
   promotionId: number;
@@ -250,8 +251,8 @@ export default function PromotionsPage() {
           startDate: newPromotion.startDate?.toISOString(),
           endDate: newPromotion.endDate?.toISOString(),
           triggers: newPromotion.triggers || [],
-          products: newPromotion.products || [],
-          markets: newPromotion.markets || [],
+          // products: newPromotion.products || [],
+          // markets: newPromotion.markets || [],
           ui_elements: newPromotion.ui_elements || [],
         }),
       });
@@ -408,7 +409,7 @@ export default function PromotionsPage() {
             // Remove the market
             return {
               ...p,
-              markets: p.markets.filter((id: string) => id !== marketId),
+              markets: p.markets.filter((id: number) => id !== marketId),
             };
           } else {
             // Add the market
@@ -709,7 +710,6 @@ export default function PromotionsPage() {
         isOpen={isUIElementOpen}
         onOpenChange={setIsUIElementOpen}
         onAddUIElement={handleAddUIElement}
-        uiElementKeyTypes={}
       />
     </div>
   );
