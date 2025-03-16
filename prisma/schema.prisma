@@ -1,0 +1,266 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Promotion {
+  id        Int       @id @default(autoincrement())
+  key       String    @unique
+  name      String
+  startDate DateTime  @map("start_date")
+  endDate   DateTime? @map("end_date")
+  order     Int       @default(0)
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  internetProducts  PromotionProductInternet[]
+  tvProducts        PromotionProductTV[]
+  voiceProducts     PromotionProductVoice[]
+  equipmentProducts PromotionProductEquipment[]
+  markets           PromotionMarket[]
+  triggers          PromotionTrigger[]
+  uiElements        UIElement[] // Added direct relation to UIElements
+
+  @@map("promotions")
+}
+
+model Market {
+  id      Int     @id @default(autoincrement())
+  key     String  @unique
+  label   String  @default("Unknown")
+  csgCode String  @default("Unknown")
+  active  Boolean @default(true)
+
+  promotions PromotionMarket[]
+
+  @@map("markets")
+}
+
+model InternetProduct {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  name      String
+  speed     String
+  price     Decimal  @db.Decimal(10, 2)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  promotions PromotionProductInternet[]
+
+  @@map("internet_products")
+}
+
+model TVProduct {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  name      String
+  channels  Int
+  price     Decimal  @db.Decimal(10, 2)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  promotions PromotionProductTV[]
+
+  @@map("tv_products")
+}
+
+model VoiceProduct {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  name      String
+  features  String[]
+  price     Decimal  @db.Decimal(10, 2)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  promotions PromotionProductVoice[]
+
+  @@map("voice_products")
+}
+
+model Equipment {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  name      String
+  type      String
+  price     Decimal  @db.Decimal(10, 2)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  promotions PromotionProductEquipment[]
+
+  @@map("equipment")
+}
+
+model UIElement {
+  id              Int     @id @default(autoincrement())
+  key             String
+  kind            String  @default("text")
+  txtText         String? @map("txt_text")
+  imageDesktopUrl String? @map("img_desktopImgUrl")
+  imageMobileUrl  String? @map("img_mobileImgUrl")
+  imageAlt        String? @map("img_alt")
+  promotionId     Int?    @map("promotion_id")
+
+  internetAssociations  UIElementInternetAssociation[]
+  tvAssociations        UIElementTVAssociation[]
+  voiceAssociations     UIElementVoiceAssociation[]
+  equipmentAssociations UIElementEquipmentAssociation[]
+  promotion             Promotion?                      @relation(fields: [promotionId], references: [id], onDelete: SetNull)
+
+  @@map("ui_elements")
+}
+
+model PromotionProductInternet {
+  id          Int      @id @default(autoincrement())
+  promotionId Int      @map("promotion_id")
+  productId   Int      @map("product_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  promotion  Promotion                      @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+  product    InternetProduct                @relation(fields: [productId], references: [id], onDelete: Cascade)
+  uiElements UIElementInternetAssociation[]
+
+  @@unique([promotionId, productId])
+  @@map("promotion_product_internet")
+}
+
+model PromotionProductTV {
+  id          Int      @id @default(autoincrement())
+  promotionId Int      @map("promotion_id")
+  productId   Int      @map("product_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  promotion  Promotion                @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+  product    TVProduct                @relation(fields: [productId], references: [id], onDelete: Cascade)
+  uiElements UIElementTVAssociation[]
+
+  @@unique([promotionId, productId])
+  @@map("promotion_product_tv")
+}
+
+model PromotionProductVoice {
+  id          Int      @id @default(autoincrement())
+  promotionId Int      @map("promotion_id")
+  productId   Int      @map("product_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  promotion  Promotion                   @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+  product    VoiceProduct                @relation(fields: [productId], references: [id], onDelete: Cascade)
+  uiElements UIElementVoiceAssociation[]
+
+  @@unique([promotionId, productId])
+  @@map("promotion_product_voice")
+}
+
+model PromotionProductEquipment {
+  id          Int      @id @default(autoincrement())
+  promotionId Int      @map("promotion_id")
+  productId   Int      @map("product_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  promotion  Promotion                       @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+  product    Equipment                       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  uiElements UIElementEquipmentAssociation[]
+
+  @@unique([promotionId, productId])
+  @@map("promotion_product_equipment")
+}
+
+model PromotionMarket {
+  id          Int      @id @default(autoincrement())
+  promotionId Int      @map("promotion_id")
+  marketId    Int      @map("market_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  promotion Promotion @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+  market    Market    @relation(fields: [marketId], references: [id], onDelete: Cascade)
+
+  @@unique([promotionId, marketId])
+  @@map("promotion_market")
+}
+
+model PromotionTrigger {
+  id          Int      @id @default(autoincrement())
+  promotionId Int      @map("promotion_id")
+  type        String
+  value       String
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  promotion Promotion @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+
+  @@map("promotion_triggers")
+}
+
+model UIElementInternetAssociation {
+  id                 Int      @id @default(autoincrement())
+  promotionProductId Int      @map("promotion_product_id")
+  uiElementId        Int      @map("ui_element_id")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  promotionProduct PromotionProductInternet @relation(fields: [promotionProductId], references: [id], onDelete: Cascade)
+  uiElement        UIElement                @relation(fields: [uiElementId], references: [id], onDelete: Cascade)
+
+  @@unique([promotionProductId, uiElementId])
+  @@map("ui_element_internet_association")
+}
+
+model UIElementTVAssociation {
+  id                 Int      @id @default(autoincrement())
+  promotionProductId Int      @map("promotion_product_id")
+  uiElementId        Int      @map("ui_element_id")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  promotionProduct PromotionProductTV @relation(fields: [promotionProductId], references: [id], onDelete: Cascade)
+  uiElement        UIElement          @relation(fields: [uiElementId], references: [id], onDelete: Cascade)
+
+  @@unique([promotionProductId, uiElementId])
+  @@map("ui_element_tv_association")
+}
+
+model UIElementVoiceAssociation {
+  id                 Int      @id @default(autoincrement())
+  promotionProductId Int      @map("promotion_product_id")
+  uiElementId        Int      @map("ui_element_id")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  promotionProduct PromotionProductVoice @relation(fields: [promotionProductId], references: [id], onDelete: Cascade)
+  uiElement        UIElement             @relation(fields: [uiElementId], references: [id], onDelete: Cascade)
+
+  @@unique([promotionProductId, uiElementId])
+  @@map("ui_element_voice_association")
+}
+
+model UIElementEquipmentAssociation {
+  id                 Int      @id @default(autoincrement())
+  promotionProductId Int      @map("promotion_product_id")
+  uiElementId        Int      @map("ui_element_id")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  promotionProduct PromotionProductEquipment @relation(fields: [promotionProductId], references: [id], onDelete: Cascade)
+  uiElement        UIElement                 @relation(fields: [uiElementId], references: [id], onDelete: Cascade)
+
+  @@unique([promotionProductId, uiElementId])
+  @@map("ui_element_equipment_association")
+}

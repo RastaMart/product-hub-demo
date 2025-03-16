@@ -1,23 +1,27 @@
 import { NextResponse } from "next/server";
-import sql from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 
 export async function POST(request: Request) {
   try {
-    const { promotionKey, marketKey } = await request.json();
+    const { promotionId, marketId } = await request.json();
 
     // Validate required fields
-    if (!promotionKey || !marketKey) {
+    if (!promotionId || !marketId) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
       );
     }
 
-    const result = await sql`
-      DELETE FROM promotion_market
-      WHERE promotion_key = ${promotionKey} AND market_key = ${marketKey}
-      RETURNING *
-    `;
+    // Use Prisma to create the association
+    const result = await prisma.promotionMarket.delete({
+      where: {
+        promotionId_marketId: {
+          promotionId,
+          marketId,
+        },
+      },
+    });
 
     return NextResponse.json({
       success: true,

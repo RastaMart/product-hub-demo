@@ -1,5 +1,6 @@
 export interface VoiceProduct {
-  key: string; // Now primary key
+  id: number;
+  key: string;
   name: string;
   type: "Landline" | "VoIP";
   features: string[];

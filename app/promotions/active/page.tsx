@@ -53,14 +53,15 @@ import { UIElementModal } from ".././components/ui-element-modal";
 import { PromotionRow } from ".././components/promotionRow";
 
 interface NewUIElementContext {
-  promotionKey: string;
-  productKey: string;
+  promotionId: number;
+  productId: number;
   productType: string;
   promoXproductID: number;
 }
 
 interface SortableRowProps {
   promotion: {
+    id: number;
     key: string;
     name: string;
     start_date: string;
@@ -72,9 +73,9 @@ interface SortableRowProps {
   };
   onAssociateProducts: (promotion: any) => void;
   onAssociateMarkets: (promotion: any) => void;
-  onConfigureUI: (newUIElementContextParam: NewUIElementContext) => void;
+  onConfigureUI: (newUIElementContext: NewUIElementContext) => void;
   isExpanded: boolean;
-  onToggleExpand: (key: string) => void;
+  onToggleExpand: (id: number) => void;
   allProducts: any[];
   markets: Market[];
 }
@@ -96,7 +97,7 @@ function SortableRow({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: promotion.key });
+  } = useSortable({ id: promotion.id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -147,12 +148,12 @@ export default function PromotionsPage() {
   const [isUIElementOpen, setIsUIElementOpen] = useState(false);
   const [newUIElementContext, setNewUIElementContext] =
     useState<NewUIElementContext>({
-      promotionKey: "",
-      productKey: "",
+      promotionId: 0,
+      productId: 0,
       productType: "",
       promoXproductID: 0,
     });
-  const [expandedRows, setExpandedRows] = useState<string[]>([]);
+  const [expandedRows, setExpandedRows] = useState<number[]>([]);
   const { toast } = useToast();
   const itemsPerPage = 10;
 
@@ -181,8 +182,8 @@ export default function PromotionsPage() {
       // Update local state
       setPromotions((items) => {
         // Find the indexes of the dragged item and the drop target
-        const activeIndex = items.findIndex((item) => item.key === active.id);
-        const overIndex = items.findIndex((item) => item.key === over.id);
+        const activeIndex = items.findIndex((item) => item.id === active.id);
+        const overIndex = items.findIndex((item) => item.id === over.id);
 
         // Return the reordered array
         return arrayMove(items, activeIndex, overIndex);
@@ -192,10 +193,10 @@ export default function PromotionsPage() {
         // Get the updated promotions after state update
         const updatedPromotions = [...promotions];
         const activeIndex = updatedPromotions.findIndex(
-          (item) => item.key === active.id
+          (item) => item.id === active.id
         );
         const overIndex = updatedPromotions.findIndex(
-          (item) => item.key === over.id
+          (item) => item.id === over.id
         );
         const reorderedPromotions = arrayMove(
           updatedPromotions,
@@ -210,7 +211,7 @@ export default function PromotionsPage() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            promotions: reorderedPromotions.map((p) => ({ key: p.key })),
+            promotions: reorderedPromotions.map((p) => ({ id: p.id })),
           }),
         });
 
@@ -283,15 +284,10 @@ export default function PromotionsPage() {
 
   const handleProductAssociation = async (
     promotion: any,
-    productKey: string
+    productId: number
   ) => {
-    // This function now just updates the local state to reflect changes made directly
-    // in the AssociationModal component
     const product = allProducts.find((p) => {
-      if ("key" in p) {
-        return p.key === productKey;
-      }
-      return p.id === productKey;
+      return p.id === productId;
     });
 
     if (!product) {
@@ -307,58 +303,97 @@ export default function PromotionsPage() {
 
     // Check if product is already associated to toggle it
     const isCurrentlyAssociated = promotion.products?.some(
-      (p: any) => p.productKey === productKey
+      (p: any) => p.productId === productId
     );
 
-    // Update local state to reflect the toggle
-    setPromotions((currentPromotions) => {
-      return currentPromotions.map((p) => {
-        if (p.key === promotion.key) {
-          if (isCurrentlyAssociated) {
-            // Remove the product
-            return {
-              ...p,
-              products: p.products.filter(
-                (prod: any) => prod.productKey !== productKey
-              ),
-            };
-          } else {
-            // Add the product
-            return {
-              ...p,
-              products: [
-                ...(p.products || []),
-                { productKey, productType, ui_elements: [] },
-              ],
-            };
-          }
-        }
-        return p;
+    try {
+      // Call the new endpoint
+      const response = await fetch(`/api/promotions/${promotion.id}/products`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          productId,
+          productType,
+          associate: !isCurrentlyAssociated,
+        }),
       });
-    });
 
-    // Update selectedPromotion if it's the current one
-    if (selectedPromotion?.key === promotion.key) {
-      if (isCurrentlyAssociated) {
-        setSelectedPromotion({
-          ...selectedPromotion,
-          products: selectedPromotion.products.filter(
-            (p: any) => p.productKey !== productKey
-          ),
-        });
-      } else {
-        setSelectedPromotion({
-          ...selectedPromotion,
-          products: [
-            ...(selectedPromotion.products || []),
-            { productKey, productType, ui_elements: [] },
-          ],
-        });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.error || "Failed to update product association"
+        );
       }
+
+      // Update local state to reflect the toggle
+      setPromotions((currentPromotions) => {
+        return currentPromotions.map((p) => {
+          if (p.id === promotion.id) {
+            if (isCurrentlyAssociated) {
+              // Remove the product
+              return {
+                ...p,
+                products: p.products.filter(
+                  (prod: any) => prod.productId !== productId
+                ),
+              };
+            } else {
+              // Add the product
+              return {
+                ...p,
+                products: [
+                  ...(p.products || []),
+                  { productId, productType, ui_elements: [] },
+                ],
+              };
+            }
+          }
+          return p;
+        });
+      });
+
+      // Update selectedPromotion if it's the current one
+      if (selectedPromotion?.id === promotion.id) {
+        if (isCurrentlyAssociated) {
+          setSelectedPromotion({
+            ...selectedPromotion,
+            products: selectedPromotion.products.filter(
+              (p: any) => p.productId !== productId
+            ),
+          });
+        } else {
+          setSelectedPromotion({
+            ...selectedPromotion,
+            products: [
+              ...(selectedPromotion.products || []),
+              { productId, productType, ui_elements: [] },
+            ],
+          });
+        }
+      }
+
+      toast({
+        title: "Success",
+        description: isCurrentlyAssociated
+          ? "Product disassociated successfully"
+          : "Product associated successfully",
+      });
+    } catch (error) {
+      console.error("Failed to update product association:", error);
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to update product association",
+        variant: "destructive",
+      });
     }
   };
 
-  const handleMarketAssociation = async (promotion: any, marketId: string) => {
+  const handleMarketAssociation = async (promotion: any, marketId: number) => {
     // This function now just updates the local state to reflect changes made directly
     // in the AssociationModal component
 
@@ -368,7 +403,7 @@ export default function PromotionsPage() {
     // Update local state to reflect the toggle
     setPromotions((currentPromotions) => {
       return currentPromotions.map((p) => {
-        if (p.key === promotion.key) {
+        if (p.id === promotion.id) {
           if (isCurrentlyAssociated) {
             // Remove the market
             return {
@@ -388,12 +423,12 @@ export default function PromotionsPage() {
     });
 
     // Update selectedPromotion if it's the current one
-    if (selectedPromotion?.key === promotion.key) {
+    if (selectedPromotion?.id === promotion.id) {
       if (isCurrentlyAssociated) {
         setSelectedPromotion({
           ...selectedPromotion,
           markets: selectedPromotion.markets.filter(
-            (id: string) => id !== marketId
+            (id: number) => id !== marketId
           ),
         });
       } else {
@@ -425,9 +460,9 @@ export default function PromotionsPage() {
 
   const handleAddUIElement = async (newElement: UIElement) => {
     console.log("Adding UI element", newElement, newUIElementContext);
-    const { promotionKey, productKey, productType, promoXproductID } =
+    const { promotionId, productId, productType, promoXproductID } =
       newUIElementContext;
-    if (!promotionKey || !productKey || !productType) {
+    if (!promotionId) {
       toast({
         title: "Error",
         description: "Missing promotion or product information",
@@ -436,63 +471,43 @@ export default function PromotionsPage() {
       return;
     }
 
-    // Determine the product association table based on the product type
-    const productTable = `promotion_product_${productType.toLowerCase()}`;
-
     try {
-      // First create the UI element
-      const elementResponse = await fetch("/api/ui-elements/elements", {
+      // Create the UI element and associate it with the product using Prisma transaction
+      const result = await fetch("/api/ui-elements", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(newElement),
+        body: JSON.stringify({
+          element: newElement,
+          productType: productType?.toLowerCase(),
+          promoXproductID,
+        }),
       });
 
-      if (!elementResponse.ok) {
-        const errorData = await elementResponse.json();
+      if (!result.ok) {
+        const errorData = await result.json();
         throw new Error(errorData.error || "Failed to create UI element");
       }
 
-      const { data: element } = await elementResponse.json();
-      const selectedProductKey = productKey; // Store this for later reference
-      const body = {
-        product_association_id: promoXproductID,
-        product_association_table: productTable,
-        element_id: element.id,
-      };
-      const response = await fetch("/api/ui-elements/product-association", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          data.error || "Failed to associate UI element with product"
-        );
-      }
+      const data = await result.json();
 
       toast({
         title: "Success",
-        description: "UI element associated with product successfully",
+        description: "UI element created and associated successfully",
       });
 
       // Update the local state to reflect the new association
       setPromotions((currentPromotions) => {
         return currentPromotions.map((p) => {
-          if (p.key === promotionKey) {
+          if (p.id === promotionId) {
             return {
               ...p,
               products: p.products.map((prod: any) => {
-                if (prod.productKey === selectedProductKey) {
+                if (prod.productId === productId) {
                   return {
                     ...prod,
-                    ui_elements: [...(prod.ui_elements || []), element],
+                    ui_elements: [...(prod.ui_elements || []), data.element],
                   };
                 }
                 return prod;
@@ -503,21 +518,8 @@ export default function PromotionsPage() {
         });
       });
 
-      // Update selectedPromotion if needed
-      if (selectedPromotion) {
-        setSelectedPromotion({
-          ...selectedPromotion,
-          products: selectedPromotion.products.map((prod: any) => {
-            if (prod.productKey === selectedProductKey) {
-              return {
-                ...prod,
-                ui_elements: [...(prod.ui_elements || []), element],
-              };
-            }
-            return prod;
-          }),
-        });
-      }
+      // Close the modal
+      setIsUIElementOpen(false);
     } catch (error) {
       console.error("Failed to associate UI element:", error);
       toast({
@@ -531,16 +533,58 @@ export default function PromotionsPage() {
     }
   };
 
-  const handleRemoveUIElement = async (elementKey: string) => {
-    console.log("Removing UI element", elementKey);
-    // TODO: Complete the API call to remove UI element from promotion
+  const handleRemoveUIElement = async (elementId: number) => {
+    console.log("Removing UI element", elementId);
+
+    try {
+      const response = await fetch(`/api/ui-elements/${elementId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to remove UI element");
+      }
+
+      // Update local state to reflect UI element removal
+      setPromotions((currentPromotions) => {
+        return currentPromotions.map((p) => {
+          return {
+            ...p,
+            products: p.products.map((prod: any) => {
+              return {
+                ...prod,
+                ui_elements: (prod.ui_elements || []).filter(
+                  (elem: any) => elem.id !== elementId
+                ),
+              };
+            }),
+          };
+        });
+      });
+
+      toast({
+        title: "Success",
+        description: "UI element removed successfully",
+      });
+    } catch (error) {
+      console.error("Failed to remove UI element:", error);
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to remove UI element",
+        variant: "destructive",
+      });
+    }
   };
 
-  const toggleExpand = (key: string) => {
+  const toggleExpand = (id: number) => {
     setExpandedRows((current) =>
-      current.includes(key)
-        ? current.filter((rowKey) => rowKey !== key)
-        : [...current, key]
+      current.includes(id)
+        ? current.filter((rowId) => rowId !== id)
+        : [...current, id]
     );
   };
 
@@ -592,14 +636,14 @@ export default function PromotionsPage() {
             </TableHeader>
             <TableBody>
               <SortableContext
-                items={currentPromotions.map((item) => item.key)}
+                items={currentPromotions.map((item) => item.id)}
                 strategy={verticalListSortingStrategy}
               >
                 {currentPromotions.map((promotion) => {
-                  const isExpanded = expandedRows.includes(promotion.key);
+                  const isExpanded = expandedRows.includes(promotion.id);
                   return (
                     <SortableRow
-                      key={promotion.key}
+                      key={promotion.id}
                       promotion={promotion}
                       onAssociateProducts={openProductAssociationModal}
                       onAssociateMarkets={openMarketAssociationModal}

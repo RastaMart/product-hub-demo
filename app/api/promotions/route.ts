@@ -1,87 +1,117 @@
-import { NextResponse } from "next/server";
-import sql from "@/lib/db";
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { v4 as uuidv4 } from "uuid";
 
-export async function GET() {
+// GET all promotions
+export async function GET(request: NextRequest) {
   try {
-    // Get all promotions with their relationships
-    const promotions = await sql`
-      SELECT p.*, 
-        (SELECT json_agg(pm.market_key) FROM promotion_market pm WHERE pm.promotion_key = p.key) as markets,
-        (
-          SELECT json_agg(
-            json_build_object(
-              'relation_id', ppi.id, 
-              'productKey', ppi.product_key, 
-              'productType', 'internet',
-              'ui_elements', ppi.ui_elements
-            )
-          ) 
-          FROM promotion_product_internet ppi 
-          WHERE ppi.promotion_key = p.key
-        ) as internet_products,
-        (
-          SELECT json_agg(
-            json_build_object(
-              'relation_id', ppt.id, 
-              'productKey', ppt.product_key, 
-              'productType', 'tv',
-              'ui_elements', ppt.ui_elements
-            )
-          ) 
-          FROM promotion_product_tv ppt 
-          WHERE ppt.promotion_key = p.key
-        ) as tv_products,
-        (
-          SELECT json_agg(
-            json_build_object(
-              'relation_id', ppv.id, 
-              'productKey', ppv.product_key, 
-              'productType', 'voice',
-              'ui_elements', ppv.ui_elements
-            )
-          ) 
-          FROM promotion_product_voice ppv 
-          WHERE ppv.promotion_key = p.key
-        ) as voice_products,
-        (
-          SELECT json_agg(
-            json_build_object(
-              'relation_id', ppe.id, 
-              'productKey', ppe.product_key, 
-              'productType', 'equipment',
-              'ui_elements', ppe.ui_elements
-            )
-          ) 
-          FROM promotion_product_equipment ppe 
-          WHERE ppe.promotion_key = p.key
-        ) as equipment_products
-      FROM promotions p
-      ORDER BY p.display_order ASC
-    `;
+    // Get all promotions with their related data
+    const promotions = await prisma.promotion.findMany({
+      orderBy: {
+        order: "asc",
+      },
+      include: {
+        internetProducts: {
+          include: {
+            product: true,
+            uiElements: {
+              include: {
+                uiElement: true,
+              },
+            },
+          },
+        },
+        tvProducts: {
+          include: {
+            product: true,
+            uiElements: {
+              include: {
+                uiElement: true,
+              },
+            },
+          },
+        },
+        voiceProducts: {
+          include: {
+            product: true,
+            uiElements: {
+              include: {
+                uiElement: true,
+              },
+            },
+          },
+        },
+        equipmentProducts: {
+          include: {
+            product: true,
+            uiElements: {
+              include: {
+                uiElement: true,
+              },
+            },
+          },
+        },
+        markets: {
+          include: {
+            market: true,
+          },
+        },
+        triggers: true,
+      },
+    });
 
-    // Combine all product types into a single products array
-    const formattedPromotions = promotions.map((p) => {
+    // Transform the data to match the expected format
+    const formattedPromotions = promotions.map((promotion) => {
+      // Collect all products from different categories
       const products = [
-        ...(p.internet_products || []),
-        ...(p.tv_products || []),
-        ...(p.voice_products || []),
-        ...(p.equipment_products || []),
+        ...promotion.internetProducts.map((p) => ({
+          id: p.id,
+          productId: p.product.id,
+          productKey: p.product.key,
+          productType: "internet",
+          ui_elements: p.uiElements.map((ue) => ue.uiElement),
+        })),
+        ...promotion.tvProducts.map((p) => ({
+          id: p.id,
+          productId: p.product.id,
+          productKey: p.product.key,
+          productType: "tv",
+          ui_elements: p.uiElements.map((ue) => ue.uiElement),
+        })),
+        ...promotion.voiceProducts.map((p) => ({
+          id: p.id,
+          productId: p.product.id,
+          productKey: p.product.key,
+          productType: "voice",
+          ui_elements: p.uiElements.map((ue) => ue.uiElement),
+        })),
+        ...promotion.equipmentProducts.map((p) => ({
+          id: p.id,
+          productId: p.product.id,
+          productKey: p.product.key,
+          productType: "equipment",
+          ui_elements: p.uiElements.map((ue) => ue.uiElement),
+        })),
       ];
 
       return {
-        ...p,
-        products: products.filter(Boolean), // Remove any null entries
-        // Remove the individual product type arrays
-        internet_products: undefined,
-        tv_products: undefined,
-        voice_products: undefined,
-        equipment_products: undefined,
+        id: promotion.id,
+        key: promotion.key,
+        name: promotion.name,
+        start_date: promotion.startDate.toISOString(),
+        end_date: promotion.endDate?.toISOString() || null,
+        triggers: promotion.triggers.map((t) => ({
+          type: t.type,
+          value: t.value,
+        })),
+        products: products,
+        markets: promotion.markets.map((m) => m.market.key),
       };
     });
 
     return NextResponse.json(formattedPromotions);
   } catch (error) {
-    console.error("Failed to fetch promotions:", error);
+    console.error("Error fetching promotions:", error);
     return NextResponse.json(
       { error: "Failed to fetch promotions" },
       { status: 500 }
@@ -89,130 +119,139 @@ export async function GET() {
   }
 }
 
-export async function POST(request: Request) {
+// POST a new promotion
+export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const {
+      id,
       name,
       startDate,
       endDate,
-      triggers,
-      products,
-      markets,
-      ui_elements,
+      triggers = [],
+      products = [],
+      markets = [],
     } = body;
 
-    // Validate required fields
-    if (!name || !startDate || !endDate) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      );
-    }
+    // Get the highest order to place this at the end
+    const maxOrderPromo = await prisma.promotion.findFirst({
+      orderBy: {
+        order: "desc",
+      },
+    });
 
-    // Generate a unique key based on name and date
-    const key = `${name.replace(/[^a-zA-Z0-9]/g, "")}-${new Date(
-      startDate
-    ).getFullYear()}`;
+    const newOrder = (maxOrderPromo?.order || 0) + 1;
 
-    // Get the maximum display_order and add 1 for the new promotion
-    const maxOrderResult = await sql`
-      SELECT COALESCE(MAX(display_order), -1) as max_order FROM promotions
-    `;
-    const display_order = (maxOrderResult[0]?.max_order || -1) + 1;
+    // Create promotion in a transaction with all its associations
+    const result = await prisma.$transaction(async (tx) => {
+      // Create the promotion
+      const promotion = await tx.promotion.create({
+        data: {
+          id,
+          key: uuidv4(),
+          name,
+          startDate: new Date(startDate),
+          endDate: endDate ? new Date(endDate) : null,
+          order: newOrder,
+          // Create triggers in the same transaction
+          triggers: {
+            create: triggers.map((trigger: any) => ({
+              type: trigger.type,
+              value: trigger.value,
+            })),
+          },
+        },
+      });
 
-    // Insert new promotion
-    const result = await sql`
-      INSERT INTO promotions (
-        key,
-        name,
-        start_date,
-        end_date,
-        triggers,
-        ui_elements,
-        display_order
-      )
-      VALUES (
-        ${key},
-        ${name},
-        ${startDate},
-        ${endDate},
-        ${triggers || []},
-        ${ui_elements || []},
-        ${display_order}
-      )
-      RETURNING *
-    `;
+      // Associate markets
+      if (markets.length > 0) {
+        const marketEntities = await tx.market.findMany({
+          where: {
+            key: {
+              in: markets,
+            },
+          },
+        });
 
-    // Insert market associations
-    if (markets && markets.length > 0) {
-      for (const marketKey of markets) {
-        await sql`
-          INSERT INTO promotion_market (promotion_key, market_key)
-          VALUES (${key}, ${marketKey})
-        `;
+        await Promise.all(
+          marketEntities.map((market) =>
+            tx.promotionMarket.create({
+              data: {
+                promotionId: promotion.id,
+                marketId: market.id,
+              },
+            })
+          )
+        );
       }
-    }
 
-    // Insert product associations
-    if (products && products.length > 0) {
+      // Associate products based on their type
       for (const product of products) {
-        switch (product.productType) {
-          case "internet":
-            await sql`
-              INSERT INTO promotion_product_internet (promotion_key, product_key, ui_elements)
-              VALUES (${key}, ${product.productKey}, ${
-              product.ui_elements || []
-            })
-            `;
-            break;
-          case "tv":
-            await sql`
-              INSERT INTO promotion_product_tv (promotion_key, product_key, ui_elements)
-              VALUES (${key}, ${product.productKey}, ${
-              product.ui_elements || []
-            })
-            `;
-            break;
-          case "voice":
-            await sql`
-              INSERT INTO promotion_product_voice (promotion_key, product_key, ui_elements)
-              VALUES (${key}, ${product.productKey}, ${
-              product.ui_elements || []
-            })
-            `;
-            break;
-          case "equipment":
-            await sql`
-              INSERT INTO promotion_product_equipment (promotion_key, product_key, ui_elements)
-              VALUES (${key}, ${product.productKey}, ${
-              product.ui_elements || []
-            })
-            `;
-            break;
+        const { productKey, productType } = product;
+
+        if (productType === "internet") {
+          const internetProduct = await tx.internetProduct.findUnique({
+            where: { key: productKey },
+          });
+          if (internetProduct) {
+            await tx.promotionProductInternet.create({
+              data: {
+                promotionId: promotion.id,
+                productId: internetProduct.id,
+              },
+            });
+          }
+        } else if (productType === "tv") {
+          const tvProduct = await tx.tVProduct.findUnique({
+            where: { key: productKey },
+          });
+          if (tvProduct) {
+            await tx.promotionProductTV.create({
+              data: {
+                promotionId: promotion.id,
+                productId: tvProduct.id,
+              },
+            });
+          }
+        } else if (productType === "voice") {
+          const voiceProduct = await tx.voiceProduct.findUnique({
+            where: { key: productKey },
+          });
+          if (voiceProduct) {
+            await tx.promotionProductVoice.create({
+              data: {
+                promotionId: promotion.id,
+                productId: voiceProduct.id,
+              },
+            });
+          }
+        } else if (productType === "equipment") {
+          const equipmentItem = await tx.equipment.findUnique({
+            where: { key: productKey },
+          });
+          if (equipmentItem) {
+            await tx.promotionProductEquipment.create({
+              data: {
+                promotionId: promotion.id,
+                productId: equipmentItem.id,
+              },
+            });
+          }
         }
       }
-    }
 
-    // Fetch the complete promotion with associations
-    const completePromotion = await sql`
-      SELECT p.*, 
-        (SELECT json_agg(pm.market_key) FROM promotion_market pm WHERE pm.promotion_key = p.key) as markets,
-        (
-          SELECT json_agg(json_build_object('productKey', ppi.product_key, 'productType', 'internet', 'ui_elements', ppi.ui_elements)) 
-          FROM promotion_product_internet ppi 
-          WHERE ppi.promotion_key = p.key
-        ) as products
-      FROM promotions p
-      WHERE p.key = ${key}
-    `;
-
-    return NextResponse.json({
-      success: true,
-      data: completePromotion[0],
+      return promotion;
     });
+
+    return NextResponse.json(
+      {
+        message: "Promotion created successfully",
+        promotion: result,
+      },
+      { status: 201 }
+    );
   } catch (error) {
-    console.error("Failed to create promotion:", error);
+    console.error("Error creating promotion:", error);
     return NextResponse.json(
       { error: "Failed to create promotion" },
       { status: 500 }

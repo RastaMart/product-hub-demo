@@ -1,12 +1,14 @@
 import { NextResponse } from "next/server";
-import sql from "@/lib/db";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 export async function POST(request: Request) {
   try {
-    const { promotionKey, productKey, productType } = await request.json();
+    const { promotionId, productId, productType } = await request.json();
 
     // Validate required fields
-    if (!promotionKey || !productKey || !productType) {
+    if (!promotionId || !productId || !productType) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -15,40 +17,31 @@ export async function POST(request: Request) {
 
     // Determine which join table to use based on product type
     let result;
-    
+    const where = {
+      where: {
+        promotionId_productId: {
+          promotionId,
+          productId,
+        },
+      },
+    };
     switch (productType.toLowerCase()) {
-      case 'internet':
-        result = await sql`
-          DELETE FROM promotion_product_internet
-          WHERE promotion_key = ${promotionKey} AND product_key = ${productKey}
-          RETURNING *
-        `;
+      case "internet":
+        result = await prisma.promotionProductInternet.delete(where);
         break;
-      
-      case 'tv':
-        result = await sql`
-          DELETE FROM promotion_product_tv
-          WHERE promotion_key = ${promotionKey} AND product_key = ${productKey}
-          RETURNING *
-        `;
+
+      case "tv":
+        result = await prisma.promotionProductTV.delete(where);
         break;
-      
-      case 'voice':
-        result = await sql`
-          DELETE FROM promotion_product_voice
-          WHERE promotion_key = ${promotionKey} AND product_key = ${productKey}
-          RETURNING *
-        `;
+
+      case "voice":
+        result = await prisma.promotionProductVoice.delete(where);
         break;
-      
-      case 'equipment':
-        result = await sql`
-          DELETE FROM promotion_product_equipment
-          WHERE promotion_key = ${promotionKey} AND product_key = ${productKey}
-          RETURNING *
-        `;
+
+      case "equipment":
+        result = await prisma.promotionProductEquipment.delete(where);
         break;
-      
+
       default:
         return NextResponse.json(
           { error: "Invalid product type" },

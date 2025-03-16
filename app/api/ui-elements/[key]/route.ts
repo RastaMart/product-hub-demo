@@ -1,36 +1,38 @@
-import { NextResponse } from "next/server";
-import sql from "@/lib/db";
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
 export async function DELETE(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { key: string } }
 ) {
   try {
     const { key } = params;
 
-    // Check if the UI element type exists
-    const existing = await sql`
-      SELECT key FROM ui_element_types WHERE key = ${key}
-    `;
+    // Find the UI element by key
+    const element = await prisma.uIElement.findUnique({
+      where: { key },
+    });
 
-    if (existing.length === 0) {
+    if (!element) {
       return NextResponse.json(
-        { error: "UI element type not found" },
+        { error: "UI element not found" },
         { status: 404 }
       );
     }
 
-    // Delete the UI element type (cascades to elements using this type)
-    await sql`
-      DELETE FROM ui_element_types
-      WHERE key = ${key}
-    `;
+    // Delete the UI element (associations will be automatically deleted due to cascade delete)
+    await prisma.uIElement.delete({
+      where: { id: element.id },
+    });
 
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error("Failed to delete UI element type:", error);
     return NextResponse.json(
-      { error: "Failed to delete UI element type" },
+      { message: "UI element deleted successfully" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error deleting UI element:", error);
+    return NextResponse.json(
+      { error: "Failed to delete UI element" },
       { status: 500 }
     );
   }

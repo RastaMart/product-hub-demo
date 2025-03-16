@@ -52,7 +52,7 @@ export function UIElementModal({
       img_desktopImgUrl: "",
       img_mobileImgUrl: "",
       img_alt: "",
-      element_type: keyDef?.type,
+      kind: keyDef?.type,
     });
   };
 
@@ -63,6 +63,7 @@ export function UIElementModal({
     // productType: string;
     onAddUIElement(newUIElement as UIElement);
     setNewUIElement({
+      id: 0,
       key: "",
       txt_text: "",
       img_desktopImgUrl: "",

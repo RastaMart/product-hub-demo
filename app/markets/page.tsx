@@ -33,18 +33,23 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 
 export default function MarketsPage() {
-  const { data: markets = [], loading, error } = useData<Market>('/api/markets');
-  const { data: internetProducts = [] } = useData('/api/products/internet');
-  const { data: tvProducts = [] } = useData('/api/products/tv');
-  const { data: voiceProducts = [] } = useData('/api/products/voice');
-  const { data: equipment = [] } = useData('/api/products/equipment');
+  const {
+    data: markets = [],
+    loading,
+    error,
+  } = useData<Market>("/api/markets");
+  const { data: internetProducts = [] } = useData("/api/products/internet");
+  const { data: tvProducts = [] } = useData("/api/products/tv");
+  const { data: voiceProducts = [] } = useData("/api/products/voice");
+  const { data: equipment = [] } = useData("/api/products/equipment");
 
   const [isOpen, setIsOpen] = useState(false);
   const [isAssociationOpen, setIsAssociationOpen] = useState(false);
   const [selectedMarket, setSelectedMarket] = useState<Market | null>(null);
   const [newMarket, setNewMarket] = useState({
     label: "",
-    code: "",
+    key: "",
+    csgCode: "",
     active: true,
     snapshotId: "",
   });
@@ -58,14 +63,15 @@ export default function MarketsPage() {
 
   const handleCreateMarket = () => {
     const market: Market = {
-      id: (markets.length + 1).toString(),
+      // id: (markets.length + 1),
       ...newMarket,
     };
     // TODO: Add API call to create market
     setIsOpen(false);
     setNewMarket({
       label: "",
-      code: "",
+      key: "",
+      csgCode: "",
       active: true,
       snapshotId: "",
     });
@@ -93,10 +99,14 @@ export default function MarketsPage() {
   const endIndex = startIndex + itemsPerPage;
   const currentMarkets = markets.slice(startIndex, endIndex);
 
-  const ProductSection = ({ title, products, keyExtractor }: { 
-    title: string, 
-    products: any[], 
-    keyExtractor: (product: any) => string 
+  const ProductSection = ({
+    title,
+    products,
+    keyExtractor,
+  }: {
+    title: string;
+    products: any[];
+    keyExtractor: (product: any) => string;
   }) => (
     <div className="space-y-4">
       <div className="sticky top-0 bg-white z-10 py-2">
@@ -116,28 +126,39 @@ export default function MarketsPage() {
             <TableRow
               key={keyExtractor(product)}
               className="cursor-pointer hover:bg-gray-50"
-              onClick={() => selectedMarket && handleProductAssociation(selectedMarket, keyExtractor(product))}
+              onClick={() =>
+                selectedMarket &&
+                handleProductAssociation(selectedMarket, keyExtractor(product))
+              }
             >
               <TableCell className="h-8 py-0">
                 <Checkbox
-                  checked={selectedMarket?.productKeys?.includes(keyExtractor(product))}
-                  onCheckedChange={() => selectedMarket && handleProductAssociation(selectedMarket, keyExtractor(product))}
+                  checked={selectedMarket?.productKeys?.includes(
+                    keyExtractor(product)
+                  )}
+                  onCheckedChange={() =>
+                    selectedMarket &&
+                    handleProductAssociation(
+                      selectedMarket,
+                      keyExtractor(product)
+                    )
+                  }
                   onClick={(e) => e.stopPropagation()}
                 />
               </TableCell>
               <TableCell className="h-8 py-0">{product.name}</TableCell>
               <TableCell className="h-8 py-0">
-                {'download_speed' in product && (
+                {"download_speed" in product && (
                   <span className="text-xs text-gray-500">
                     {product.download_speed}/{product.upload_speed} Mbps
                   </span>
                 )}
-                {'type' in product && 'features' in product && (
+                {"type" in product && "features" in product && (
                   <span className="text-xs text-gray-500">
                     {product.type} - {product.features.length} features
                   </span>
                 )}
-                {'monthly_price' in product && (
+                {"monthly_price" in product && (
                   <span className="text-xs text-gray-500">
                     ${product.monthly_price}/mo
                   </span>
@@ -177,18 +198,35 @@ export default function MarketsPage() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Code (4 digits)</label>
+                <label className="text-sm font-medium">Key</label>
                 <Input
-                  value={newMarket.code}
+                  value={
+                    newMarket.key ||
+                    newMarket.label.toLowerCase().replace(/\s/g, "-")
+                  }
                   onChange={(e) =>
-                    setNewMarket({ ...newMarket, code: e.target.value })
+                    setNewMarket({ ...newMarket, key: e.target.value })
+                  }
+                  placeholder="Market key"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">
+                  CSG Code (4 digits)
+                </label>
+                <Input
+                  value={newMarket.csgCode}
+                  onChange={(e) =>
+                    setNewMarket({ ...newMarket, csgCode: e.target.value })
                   }
                   placeholder="1234"
                   maxLength={4}
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Associated Snapshot</label>
+                <label className="text-sm font-medium">
+                  Associated Snapshot
+                </label>
                 <Select
                   value={newMarket.snapshotId}
                   onValueChange={(value) =>
@@ -209,7 +247,9 @@ export default function MarketsPage() {
               </div>
               <Button
                 onClick={handleCreateMarket}
-                disabled={!newMarket.label || !newMarket.code}
+                disabled={
+                  !newMarket.label || !newMarket.key || !newMarket.csgCode
+                }
                 className="w-full bg-[#1a237e] hover:bg-[#1a237e]/90"
               >
                 Create Market
@@ -223,18 +263,19 @@ export default function MarketsPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Code</TableHead>
+              <TableHead>Key</TableHead>
               <TableHead>Label</TableHead>
+              <TableHead>CSG Code</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Snapshot</TableHead>
               <TableHead className="w-8"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {currentMarkets.map((market) => (
               <TableRow key={market.id}>
-                <TableCell>{market.code}</TableCell>
+                <TableCell>{market.key}</TableCell>
                 <TableCell className="font-medium">{market.label}</TableCell>
+                <TableCell>{market.csgCode}</TableCell>
                 <TableCell>
                   <span
                     className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -245,9 +286,6 @@ export default function MarketsPage() {
                   >
                     {market.active ? "Active" : "Inactive"}
                   </span>
-                </TableCell>
-                <TableCell>
-                  {market.snapshotId && mockSnapshots.find(s => s.id === market.snapshotId)?.description}
                 </TableCell>
                 <TableCell>
                   <Button
@@ -295,23 +333,23 @@ export default function MarketsPage() {
           </DialogHeader>
           <ScrollArea className="h-[600px] pr-4">
             <div className="space-y-8">
-              <ProductSection 
-                title="Internet Products" 
+              <ProductSection
+                title="Internet Products"
                 products={internetProducts}
                 keyExtractor={(product) => product.key}
               />
-              <ProductSection 
-                title="TV Products" 
+              <ProductSection
+                title="TV Products"
                 products={tvProducts}
                 keyExtractor={(product) => product.id}
               />
-              <ProductSection 
-                title="Voice Products" 
+              <ProductSection
+                title="Voice Products"
                 products={voiceProducts}
                 keyExtractor={(product) => product.id}
               />
-              <ProductSection 
-                title="Equipment" 
+              <ProductSection
+                title="Equipment"
                 products={equipment}
                 keyExtractor={(product) => product.id}
               />

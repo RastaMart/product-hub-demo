@@ -1,5 +1,6 @@
 export interface InternetProduct {
-  key: string; // Now primary key
+  id: number;
+  key: string;
   name: string;
   download_speed: number;
   upload_speed: number;

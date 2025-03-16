@@ -1,5 +1,5 @@
 export interface Equipment {
-  id: string;
+  id: number;
   name: string;
   type: "Router" | "Modem" | "TV Box" | "Phone";
   features: string[];

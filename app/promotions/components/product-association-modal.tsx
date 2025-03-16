@@ -18,7 +18,7 @@ interface ProductAssociationModalProps {
   onOpenChange: (open: boolean) => void;
   selectedPromotion: any | null;
   allProducts: any[];
-  onProductAssociation: (promotion: any, productKey: string) => void;
+  onProductAssociation: (promotion: any, productId: number) => void;
 }
 
 export function ProductAssociationModal({
@@ -31,23 +31,24 @@ export function ProductAssociationModal({
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState<Record<string, boolean>>({});
 
-  const isProductSelected = (productKey: string) => {
+  const isProductSelected = (productId: number) => {
     if (!selectedPromotion?.products) return false;
+    console.log("isProductSelected", selectedPromotion.products, productId);
     return selectedPromotion.products.some(
-      (p: any) => p.productKey === productKey
+      (p: any) => p.productId === productId
     );
   };
 
   const handleProductToggle = async (
-    productKey: string,
+    productId: number,
     productType: string
   ) => {
     if (!selectedPromotion) return;
 
-    setIsSubmitting((prev) => ({ ...prev, [productKey]: true }));
+    setIsSubmitting((prev) => ({ ...prev, [productId]: true }));
 
     try {
-      const isCurrentlySelected = isProductSelected(productKey);
+      const isCurrentlySelected = isProductSelected(productId);
 
       const endpoint = isCurrentlySelected
         ? "/api/promotions/product/disassociate"
@@ -59,8 +60,8 @@ export function ProductAssociationModal({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          promotionKey: selectedPromotion.key,
-          productKey,
+          promotionId: selectedPromotion.id,
+          productId,
           productType,
         }),
       });
@@ -70,7 +71,7 @@ export function ProductAssociationModal({
         throw new Error(data.error || "Failed to update product association");
       }
 
-      onProductAssociation(selectedPromotion, productKey);
+      onProductAssociation(selectedPromotion.id, productId);
 
       toast({
         title: "Success",
@@ -87,7 +88,7 @@ export function ProductAssociationModal({
         variant: "destructive",
       });
     } finally {
-      setIsSubmitting((prev) => ({ ...prev, [productKey]: false }));
+      setIsSubmitting((prev) => ({ ...prev, [productId]: false }));
     }
   };
 
@@ -111,29 +112,27 @@ export function ProductAssociationModal({
                       {allProducts
                         .filter((p) => p.type === type)
                         .map((product) => {
-                          const productKey =
-                            "key" in product ? product.key : product.id;
-                          const isChecked = isProductSelected(productKey);
-                          const isLoading = isSubmitting[productKey] || false;
+                          const isChecked = isProductSelected(product.id);
+                          const isLoading = isSubmitting[product.id] || false;
 
                           return (
                             <div
-                              key={productKey}
+                              key={product.id}
                               className="flex items-center space-x-2 p-2 rounded hover:bg-gray-50"
                             >
                               <Checkbox
-                                id={`product-${productKey}`}
+                                id={`product-${product.id}`}
                                 checked={isChecked}
                                 disabled={isLoading}
                                 onCheckedChange={() =>
                                   handleProductToggle(
-                                    productKey,
+                                    product.id,
                                     type.toLowerCase()
                                   )
                                 }
                               />
                               <label
-                                htmlFor={`product-${productKey}`}
+                                htmlFor={`product-${product.id}`}
                                 className={`text-sm cursor-pointer flex-grow ${
                                   isLoading ? "opacity-70" : ""
                                 }`}

@@ -1,12 +1,14 @@
 import { NextResponse } from "next/server";
-import sql from "@/lib/db";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 export async function POST(request: Request) {
   try {
-    const { promotionKey, productKey, productType } = await request.json();
+    const { promotionId, productId, productType } = await request.json();
 
     // Validate required fields
-    if (!promotionKey || !productKey || !productType) {
+    if (!promotionId || !productId || !productType) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -15,44 +17,37 @@ export async function POST(request: Request) {
 
     // Determine which join table to use based on product type
     let result;
-    
+    const where = {
+      where: {
+        promotionId_productId: {
+          promotionId,
+          productId,
+        },
+      },
+      update: {},
+      create: {
+        promotionId,
+        productId,
+      },
+    };
+
     switch (productType.toLowerCase()) {
-      case 'internet':
-        result = await sql`
-          INSERT INTO promotion_product_internet (promotion_key, product_key)
-          VALUES (${promotionKey}, ${productKey})
-          ON CONFLICT (promotion_key, product_key) DO NOTHING
-          RETURNING *
-        `;
+      case "internet":
+        result = await prisma.promotionProductInternet.upsert(where);
         break;
-      
-      case 'tv':
-        result = await sql`
-          INSERT INTO promotion_product_tv (promotion_key, product_key)
-          VALUES (${promotionKey}, ${productKey})
-          ON CONFLICT (promotion_key, product_key) DO NOTHING
-          RETURNING *
-        `;
+
+      case "tv":
+        result = await prisma.promotionProductTV.upsert(where);
         break;
-      
-      case 'voice':
-        result = await sql`
-          INSERT INTO promotion_product_voice (promotion_key, product_key)
-          VALUES (${promotionKey}, ${productKey})
-          ON CONFLICT (promotion_key, product_key) DO NOTHING
-          RETURNING *
-        `;
+
+      case "voice":
+        result = await prisma.promotionProductVoice.upsert(where);
         break;
-      
-      case 'equipment':
-        result = await sql`
-          INSERT INTO promotion_product_equipment (promotion_key, product_key)
-          VALUES (${promotionKey}, ${productKey})
-          ON CONFLICT (promotion_key, product_key) DO NOTHING
-          RETURNING *
-        `;
+
+      case "equipment":
+        result = await prisma.promotionProductEquipment.upsert(where);
         break;
-      
+
       default:
         return NextResponse.json(
           { error: "Invalid product type" },

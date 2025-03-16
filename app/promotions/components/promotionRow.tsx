@@ -14,6 +14,7 @@ import { ProductAssociation } from "@/lib/models/promotion";
 
 interface PromotionRowProps {
   promotion: {
+    id: number;
     key: string;
     name: string;
     start_date: string;
@@ -24,7 +25,7 @@ interface PromotionRowProps {
     markets: string[];
   };
   isExpanded: boolean;
-  onToggleExpand: (key: string) => void;
+  onToggleExpand: (id: number) => void;
   onConfigureUI: (promotion: any) => void;
   onAssociateProducts?: (promotion: any) => void;
   onAssociateMarkets?: (promotion: any) => void;
@@ -54,15 +55,13 @@ export function PromotionRow({
   const startDate = new Date(promotion.start_date);
   const endDate = new Date(promotion.end_date);
 
-  const getProductName = (productKey: string) => {
-    const product = allProducts.find((p) =>
-      "key" in p ? p.key === productKey : p.key === productKey
-    );
-    return product ? product.name : productKey;
+  const getProductName = (productId: number) => {
+    const product = allProducts.find((p) => p.id === productId);
+    return product?.name;
   };
 
   const getMarketName = (marketId: string) => {
-    const market = markets.find((m) => m.key === marketId);
+    const market = markets.find((m) => m.id === marketId);
     return market ? market.label : marketId;
   };
 
@@ -81,7 +80,7 @@ export function PromotionRow({
               variant="ghost"
               size="sm"
               className="p-0 hover:bg-transparent"
-              onClick={() => onToggleExpand(promotion.key)}
+              onClick={() => onToggleExpand(promotion.id)}
             >
               {isExpanded ? (
                 <ChevronDown className="h-4 w-4" />
@@ -149,7 +148,12 @@ export function PromotionRow({
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => onConfigureUI(promotion)}
+              onClick={() =>
+                onConfigureUI({
+                  promotionId: promotion.id,
+                  promotionKey: promotion.key,
+                })
+              }
               className="h-8 w-8"
               title="Configure UI Elements"
             >
@@ -179,63 +183,67 @@ export function PromotionRow({
                   )}
                 </h4>
                 <div className="grid grid-cols-2 gap-2">
-                  {promotion.products.map((pkg) => (
-                    <div
-                      key={pkg.productKey}
-                      className="p-2 rounded-lg bg-white border"
-                    >
-                      <p className="font-medium">
-                        {getProductName(pkg.productKey)}
-                      </p>
-                      {pkg.ui_elements.length > 0 && (
-                        <div className="mt-1 flex flex-wrap gap-1">
-                          {pkg.ui_elements.map(({ key }) => (
-                            <span
-                              key={key}
-                              className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700"
-                            >
-                              {key}
-                            </span>
-                          ))}
+                  {promotion.products.map((pkg) => {
+                    return (
+                      <div
+                        key={pkg.productId}
+                        className="p-2 rounded-lg bg-white border"
+                      >
+                        <p className="font-medium">
+                          {getProductName(pkg.productId)}
+                        </p>
+                        {pkg.ui_elements.length > 0 && (
+                          <div className="mt-1 flex flex-wrap gap-1">
+                            {pkg.ui_elements.map(({ key }) => (
+                              <span
+                                key={key}
+                                className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700"
+                              >
+                                {key}
+                              </span>
+                            ))}
 
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="px-2 py-0 h-6 rounded-full text-xs font-medium bg-gray-100 text-gray-700 hover:bg-gray-200"
-                            onClick={() =>
-                              onConfigureUI({
-                                promotionKey: promotion.key,
-                                productKey: pkg.productKey,
-                                productType: pkg.productType,
-                                promoXproductID: pkg.relation_id,
-                              })
-                            }
-                          >
-                            <Plus className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      )}
-                      {pkg.ui_elements.length === 0 && (
-                        <div className="mt-1">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="px-2 py-0 h-6 rounded-full text-xs font-medium bg-gray-100 text-gray-700 hover:bg-gray-200"
-                            onClick={() =>
-                              onConfigureUI({
-                                promotionKey: promotion.key,
-                                productKey: pkg.productKey,
-                                productType: pkg.productType,
-                                promoXproductID: pkg.relation_id,
-                              })
-                            }
-                          >
-                            <Plus className="h-3 w-3 mr-1" /> Add UI Element
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="px-2 py-0 h-6 rounded-full text-xs font-medium bg-gray-100 text-gray-700 hover:bg-gray-200"
+                              onClick={() =>
+                                onConfigureUI({
+                                  promotionId: promotion.id,
+                                  promotionKey: promotion.key,
+                                  productId: pkg.productId,
+                                  productType: pkg.productType,
+                                  promoXproductID: pkg.id,
+                                })
+                              }
+                            >
+                              <Plus className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        )}
+                        {pkg.ui_elements.length === 0 && (
+                          <div className="mt-1">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="px-2 py-0 h-6 rounded-full text-xs font-medium bg-gray-100 text-gray-700 hover:bg-gray-200"
+                              onClick={() =>
+                                onConfigureUI({
+                                  promotionId: promotion.id,
+                                  promotionKey: promotion.key,
+                                  productId: pkg.productId,
+                                  productType: pkg.productType,
+                                  promoXproductID: pkg.id,
+                                })
+                              }
+                            >
+                              <Plus className="h-3 w-3 mr-1" /> Add UI Element
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
               <div>

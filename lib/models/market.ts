@@ -1,9 +1,9 @@
 export interface Market {
-  key: string; // Now primary key
+  id: number;
+  key: string;
   label: string;
-  code: string;
+  csgCode: string;
   active: boolean;
-  snapshotId?: string;
   // Many-to-many relationship properties
   internetProducts?: string[];
   tvProducts?: string[];

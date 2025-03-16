@@ -1,17 +1,9 @@
-export interface UIElement {
-  key: string;
-  type: "text" | "image";
-  description?: string;
-  txt_text?: string;
-  img_desktopImgUrl?: string;
-  img_mobileImgUrl?: string;
-  img_alt?: string;
-}
+import { UIElement } from "./ui-element";
 
 export interface ProductAssociation {
-  relation_id: number;
-  promotionKey: string;
-  productKey: string;
+  id: number;
+  promotionId: number;
+  productId: number;
   productType: "internet" | "tv" | "voice" | "equipment";
   ui_elements: UIElement[];
 }
@@ -24,11 +16,12 @@ export interface TriggerConfig {
 }
 
 export interface MarketAssociation {
-  promotionKey: string;
-  marketKey: string;
+  promotionId: string;
+  marketId: string;
 }
 
 export interface Promotion {
+  id: number;
   key: string;
   name: string;
   startDate?: Date;

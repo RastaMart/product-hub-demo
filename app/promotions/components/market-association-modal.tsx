@@ -18,7 +18,7 @@ interface MarketAssociationModalProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   selectedPromotion: any | null;
-  onMarketAssociation: (promotion: any, marketId: string) => void;
+  onMarketAssociation: (promotion: any, marketId: number) => void;
 }
 
 export function MarketAssociationModal({
@@ -31,12 +31,12 @@ export function MarketAssociationModal({
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState<Record<string, boolean>>({});
 
-  const isMarketSelected = (marketId: string) => {
+  const isMarketSelected = (marketId: number) => {
     if (!selectedPromotion?.markets) return false;
     return selectedPromotion.markets.includes(marketId);
   };
 
-  const handleMarketToggle = async (marketId: string) => {
+  const handleMarketToggle = async (marketId: number) => {
     if (!selectedPromotion) return;
 
     setIsSubmitting((prev) => ({ ...prev, [marketId]: true }));
@@ -54,8 +54,8 @@ export function MarketAssociationModal({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          promotionKey: selectedPromotion.key,
-          marketKey: marketId,
+          promotionId: selectedPromotion.id,
+          marketId,
         }),
       });
 
@@ -97,29 +97,30 @@ export function MarketAssociationModal({
               <h3 className="text-lg font-semibold mb-4">Markets</h3>
               <div className="grid grid-cols-2 gap-4">
                 {markets.map((market) => {
-                  const marketId = market.key || market.id;
-                  const isChecked = isMarketSelected(marketId);
-                  const isLoading = isSubmitting[marketId] || false;
+                  const isChecked = isMarketSelected(market.id);
+                  const isLoading = isSubmitting[market.id] || false;
 
                   return (
                     <div
-                      key={marketId}
+                      key={market.id}
                       className="flex items-center space-x-2 p-2 rounded hover:bg-gray-50"
                     >
                       <Checkbox
-                        id={`market-${marketId}`}
+                        id={`market-${market.id}`}
                         checked={isChecked}
                         disabled={isLoading}
-                        onCheckedChange={() => handleMarketToggle(marketId)}
+                        onCheckedChange={() => handleMarketToggle(market.id)}
                       />
                       <label
-                        htmlFor={`market-${marketId}`}
+                        htmlFor={`market-${market.id}`}
                         className={`cursor-pointer flex-grow ${
                           isLoading ? "opacity-70" : ""
                         }`}
                       >
                         <p className="text-sm font-medium">{market.label}</p>
-                        <p className="text-xs text-gray-500">{market.code}</p>
+                        <p className="text-xs text-gray-500">
+                          {market.csgCode}
+                        </p>
                         {isLoading && (
                           <span className="text-xs text-gray-500">
                             (updating...)
