@@ -5,7 +5,7 @@ export interface ProductAssociation {
   promotionId: number;
   productId: number;
   productType: "internet" | "tv" | "voice" | "equipment";
-  ui_elements: UIElement[];
+  uiElements: UIElement[];
 }
 
 export interface TriggerConfig {
@@ -27,7 +27,7 @@ export interface Promotion {
   startDate?: Date;
   endDate?: Date;
   triggers?: TriggerConfig[];
-  ui_elements?: UIElement[];
+  uiElements?: UIElement[];
   display_order: number;
 
   // Relations - these would be populated by your API when needed

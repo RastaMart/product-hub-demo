@@ -57,6 +57,7 @@ export async function GET(request: NextRequest) {
           },
         },
         triggers: true,
+        uiElements: true,
       },
     });
 
@@ -69,28 +70,28 @@ export async function GET(request: NextRequest) {
           productId: p.product.id,
           productKey: p.product.key,
           productType: "internet",
-          ui_elements: p.uiElements.map((ue) => ue.uiElement),
+          uiElements: p.uiElements.map((ue) => ue.uiElement),
         })),
         ...promotion.tvProducts.map((p) => ({
           id: p.id,
           productId: p.product.id,
           productKey: p.product.key,
           productType: "tv",
-          ui_elements: p.uiElements.map((ue) => ue.uiElement),
+          uiElements: p.uiElements.map((ue) => ue.uiElement),
         })),
         ...promotion.voiceProducts.map((p) => ({
           id: p.id,
           productId: p.product.id,
           productKey: p.product.key,
           productType: "voice",
-          ui_elements: p.uiElements.map((ue) => ue.uiElement),
+          uiElements: p.uiElements.map((ue) => ue.uiElement),
         })),
         ...promotion.equipmentProducts.map((p) => ({
           id: p.id,
           productId: p.product.id,
           productKey: p.product.key,
           productType: "equipment",
-          ui_elements: p.uiElements.map((ue) => ue.uiElement),
+          uiElements: p.uiElements.map((ue) => ue.uiElement),
         })),
       ];
 
@@ -106,6 +107,7 @@ export async function GET(request: NextRequest) {
         })),
         products: products,
         markets: promotion.markets.map((m) => m.market.key),
+        uiElements: promotion.uiElements,
       };
     });
 

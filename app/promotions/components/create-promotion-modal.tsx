@@ -26,26 +26,25 @@ export function CreatePromotionModal({
   onCreatePromotion,
 }: CreatePromotionModalProps) {
   const [newPromotion, setNewPromotion] = useState<Partial<Promotion>>({
-    types: [{
-      siteWide: false,
-      cmsBlock: false
-    }],
-    productPackages: [],
-    markets: [],
-    ui_elements: []
+    triggers: [
+      {
+        siteWide: false,
+      },
+    ],
+    uiElements: [],
   });
 
   const handleCreatePromotion = () => {
-    if (!newPromotion.name || !newPromotion.startDate || !newPromotion.endDate) return;
+    if (!newPromotion.name || !newPromotion.startDate || !newPromotion.endDate)
+      return;
     onCreatePromotion(newPromotion);
     setNewPromotion({
-      types: [{
-        siteWide: false,
-        cmsBlock: false
-      }],
-      productPackages: [],
-      markets: [],
-      ui_elements: []
+      triggers: [
+        {
+          siteWide: false,
+        },
+      ],
+      uiElements: [],
     });
   };
 
@@ -59,7 +58,7 @@ export function CreatePromotionModal({
           <div className="space-y-2">
             <label className="text-sm font-medium">Name</label>
             <Input
-              value={newPromotion.name || ''}
+              value={newPromotion.name || ""}
               onChange={(e) =>
                 setNewPromotion({ ...newPromotion, name: e.target.value })
               }
@@ -73,9 +72,16 @@ export function CreatePromotionModal({
                 <CalendarIcon className="h-4 w-4 text-gray-500" />
                 <Input
                   type="date"
-                  value={newPromotion.startDate ? format(newPromotion.startDate, "yyyy-MM-dd") : ''}
+                  value={
+                    newPromotion.startDate
+                      ? format(newPromotion.startDate, "yyyy-MM-dd")
+                      : ""
+                  }
                   onChange={(e) =>
-                    setNewPromotion({ ...newPromotion, startDate: new Date(e.target.value) })
+                    setNewPromotion({
+                      ...newPromotion,
+                      startDate: new Date(e.target.value),
+                    })
                   }
                 />
               </div>
@@ -86,9 +92,16 @@ export function CreatePromotionModal({
                 <CalendarIcon className="h-4 w-4 text-gray-500" />
                 <Input
                   type="date"
-                  value={newPromotion.endDate ? format(newPromotion.endDate, "yyyy-MM-dd") : ''}
+                  value={
+                    newPromotion.endDate
+                      ? format(newPromotion.endDate, "yyyy-MM-dd")
+                      : ""
+                  }
                   onChange={(e) =>
-                    setNewPromotion({ ...newPromotion, endDate: new Date(e.target.value) })
+                    setNewPromotion({
+                      ...newPromotion,
+                      endDate: new Date(e.target.value),
+                    })
                   }
                 />
               </div>
@@ -99,14 +112,16 @@ export function CreatePromotionModal({
             <div className="grid grid-cols-2 gap-2">
               <div className="flex items-center space-x-2">
                 <Checkbox
-                  checked={newPromotion.types?.[0]?.siteWide}
+                  checked={newPromotion.triggers?.[0]?.siteWide}
                   onCheckedChange={(checked) =>
                     setNewPromotion({
                       ...newPromotion,
-                      types: [{
-                        ...newPromotion.types![0],
-                        siteWide: checked as boolean
-                      }]
+                      triggers: [
+                        {
+                          ...newPromotion.triggers![0],
+                          siteWide: checked as boolean,
+                        },
+                      ],
                     })
                   }
                 />
@@ -114,14 +129,16 @@ export function CreatePromotionModal({
               </div>
               <div className="flex items-center space-x-2">
                 <Checkbox
-                  checked={newPromotion.types?.[0]?.cmsBlock}
+                  checked={newPromotion.triggers?.[0]?.cmsBlock}
                   onCheckedChange={(checked) =>
                     setNewPromotion({
                       ...newPromotion,
-                      types: [{
-                        ...newPromotion.types![0],
-                        cmsBlock: checked as boolean
-                      }]
+                      triggers: [
+                        {
+                          ...newPromotion.triggers![0],
+                          cmsBlock: checked as boolean,
+                        },
+                      ],
                     })
                   }
                 />
@@ -132,14 +149,16 @@ export function CreatePromotionModal({
           <div className="space-y-2">
             <label className="text-sm font-medium">Promo Code</label>
             <Input
-              value={newPromotion.types?.[0]?.promoCode || ''}
+              value={newPromotion.types?.[0]?.promoCode || ""}
               onChange={(e) =>
                 setNewPromotion({
                   ...newPromotion,
-                  types: [{
-                    ...newPromotion.types![0],
-                    promoCode: e.target.value
-                  }]
+                  types: [
+                    {
+                      ...newPromotion.types![0],
+                      promoCode: e.target.value,
+                    },
+                  ],
                 })
               }
               placeholder="SUMMER24"
@@ -148,14 +167,16 @@ export function CreatePromotionModal({
           <div className="space-y-2">
             <label className="text-sm font-medium">Abandoned Cart Code</label>
             <Input
-              value={newPromotion.types?.[0]?.abandonedCartCode || ''}
+              value={newPromotion.types?.[0]?.abandonedCartCode || ""}
               onChange={(e) =>
                 setNewPromotion({
                   ...newPromotion,
-                  types: [{
-                    ...newPromotion.types![0],
-                    abandonedCartCode: e.target.value
-                  }]
+                  types: [
+                    {
+                      ...newPromotion.types![0],
+                      abandonedCartCode: e.target.value,
+                    },
+                  ],
                 })
               }
               placeholder="COMEBACK25"
@@ -163,7 +184,11 @@ export function CreatePromotionModal({
           </div>
           <Button
             onClick={handleCreatePromotion}
-            disabled={!newPromotion.name || !newPromotion.startDate || !newPromotion.endDate}
+            disabled={
+              !newPromotion.name ||
+              !newPromotion.startDate ||
+              !newPromotion.endDate
+            }
             className="w-full bg-[#1a237e] hover:bg-[#1a237e]/90"
           >
             Create Promotion

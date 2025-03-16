@@ -61,20 +61,10 @@ interface NewUIElementContext {
 }
 
 interface SortableRowProps {
-  promotion: {
-    id: number;
-    key: string;
-    name: string;
-    start_date: string;
-    end_date: string;
-    triggers: any[];
-    products: any[];
-    markets: string[];
-    ui_elements: any[];
-  };
+  promotion: Promotion;
   onAssociateProducts: (promotion: any) => void;
   onAssociateMarkets: (promotion: any) => void;
-  onConfigureUI: (newUIElementContext: NewUIElementContext) => void;
+  addUiElement: (newUIElementContext: NewUIElementContext) => void;
   isExpanded: boolean;
   onToggleExpand: (id: number) => void;
   allProducts: any[];
@@ -85,7 +75,7 @@ function SortableRow({
   promotion,
   onAssociateProducts,
   onAssociateMarkets,
-  onConfigureUI,
+  addUiElement,
   isExpanded,
   onToggleExpand,
   allProducts,
@@ -113,7 +103,7 @@ function SortableRow({
       promotion={promotion}
       isExpanded={isExpanded}
       onToggleExpand={onToggleExpand}
-      onConfigureUI={onConfigureUI}
+      addUiElement={addUiElement}
       onAssociateProducts={onAssociateProducts}
       onAssociateMarkets={onAssociateMarkets}
       dragHandleProps={{ ...attributes, ...listeners }}
@@ -253,7 +243,7 @@ export default function PromotionsPage() {
           triggers: newPromotion.triggers || [],
           // products: newPromotion.products || [],
           // markets: newPromotion.markets || [],
-          ui_elements: newPromotion.ui_elements || [],
+          uiElements: newPromotion.uiElements || [],
         }),
       });
 
@@ -346,7 +336,7 @@ export default function PromotionsPage() {
                 ...p,
                 products: [
                   ...(p.products || []),
-                  { productId, productType, ui_elements: [] },
+                  { productId, productType, uiElements: [] },
                 ],
               };
             }
@@ -369,7 +359,7 @@ export default function PromotionsPage() {
             ...selectedPromotion,
             products: [
               ...(selectedPromotion.products || []),
-              { productId, productType, ui_elements: [] },
+              { productId, productType, uiElements: [] },
             ],
           });
         }
@@ -480,6 +470,7 @@ export default function PromotionsPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          promotionId,
           element: newElement,
           productType: productType?.toLowerCase(),
           promoXproductID,
@@ -508,7 +499,7 @@ export default function PromotionsPage() {
                 if (prod.productId === productId) {
                   return {
                     ...prod,
-                    ui_elements: [...(prod.ui_elements || []), data.element],
+                    uiElements: [...(prod.uiElements || []), data.element],
                   };
                 }
                 return prod;
@@ -555,7 +546,7 @@ export default function PromotionsPage() {
             products: p.products.map((prod: any) => {
               return {
                 ...prod,
-                ui_elements: (prod.ui_elements || []).filter(
+                uiElements: (prod.uiElements || []).filter(
                   (elem: any) => elem.id !== elementId
                 ),
               };
@@ -631,7 +622,6 @@ export default function PromotionsPage() {
                 <TableHead>Date Range</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>Promo Code</TableHead>
-                <TableHead>UI Elements</TableHead>
                 <TableHead className="w-24"></TableHead>
               </TableRow>
             </TableHeader>
@@ -648,7 +638,7 @@ export default function PromotionsPage() {
                       promotion={promotion}
                       onAssociateProducts={openProductAssociationModal}
                       onAssociateMarkets={openMarketAssociationModal}
-                      onConfigureUI={openUIElementModal}
+                      addUiElement={openUIElementModal}
                       isExpanded={isExpanded}
                       onToggleExpand={toggleExpand}
                       allProducts={allProducts}

@@ -10,23 +10,13 @@ import {
   LinkIcon,
   Plus,
 } from "lucide-react";
-import { ProductAssociation } from "@/lib/models/promotion";
+import { ProductAssociation, Promotion } from "@/lib/models/promotion";
 
 interface PromotionRowProps {
-  promotion: {
-    id: number;
-    key: string;
-    name: string;
-    start_date: string;
-    end_date: string;
-    triggers: any[];
-    ui_elements: any[];
-    products: ProductAssociation[];
-    markets: string[];
-  };
+  promotion: Promotion;
   isExpanded: boolean;
   onToggleExpand: (id: number) => void;
-  onConfigureUI: (promotion: any) => void;
+  addUiElement: (promotion: any) => void;
   onAssociateProducts?: (promotion: any) => void;
   onAssociateMarkets?: (promotion: any) => void;
   dragHandleProps: any;
@@ -42,7 +32,7 @@ export function PromotionRow({
   promotion,
   isExpanded,
   onToggleExpand,
-  onConfigureUI,
+  addUiElement,
   onAssociateProducts,
   onAssociateMarkets,
   dragHandleProps,
@@ -51,10 +41,6 @@ export function PromotionRow({
   allProducts = [],
   markets = [],
 }: PromotionRowProps) {
-  // Convert string dates to Date objects for formatting
-  const startDate = new Date(promotion.start_date);
-  const endDate = new Date(promotion.end_date);
-
   const getProductName = (productId: number) => {
     const product = allProducts.find((p) => p.id === productId);
     return product?.name;
@@ -92,16 +78,8 @@ export function PromotionRow({
           </div>
         </TableCell>
         <TableCell>
-          <div className="text-sm">
-            <div>{format(startDate, "MMM d, yyyy")}</div>
-            <div className="text-gray-500">
-              {format(endDate, "MMM d, yyyy")}
-            </div>
-          </div>
-        </TableCell>
-        <TableCell>
           <div className="flex flex-wrap gap-1">
-            {promotion.triggers.map((type, index) => (
+            {promotion.triggers?.map((type, index) => (
               <div key={index} className="space-y-1">
                 {type.siteWide && (
                   <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
@@ -118,7 +96,7 @@ export function PromotionRow({
           </div>
         </TableCell>
         <TableCell>
-          {promotion.triggers.map((type, index) => (
+          {promotion.triggers?.map((type, index) => (
             <div key={index} className="space-y-1">
               {type.promoCode && (
                 <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
@@ -129,27 +107,12 @@ export function PromotionRow({
           ))}
         </TableCell>
         <TableCell>
-          <div className="flex flex-wrap gap-1">
-            {promotion.ui_elements?.map(({ key }) => (
-              <span
-                key={key}
-                className="px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700"
-              >
-                {key}
-                {/* <Button onClick={() => handleRemoveUIElement("promotion", key)}>
-                  X
-                </Button> */}
-              </span>
-            ))}
-          </div>
-        </TableCell>
-        <TableCell>
           <div className="flex gap-2">
             <Button
               variant="ghost"
               size="icon"
               onClick={() =>
-                onConfigureUI({
+                addUiElement({
                   promotionId: promotion.id,
                   promotionKey: promotion.key,
                 })
@@ -167,6 +130,38 @@ export function PromotionRow({
         <TableRow className="bg-gray-50">
           <TableCell colSpan={6} className="p-4">
             <div className="space-y-4 px-8">
+              <div>
+                <h4 className="text-sm font-medium mb-2">UI Elements</h4>
+                <div className="grid grid-cols-2 gap-2"></div>
+                {promotion.uiElements?.map((uiElement) => (
+                  <span
+                    key={uiElement.key}
+                    className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700"
+                  >
+                    {uiElement.key}
+                    {/* <Button
+                      onClick={() => handleRemoveUIElement("promotion", key)}
+                    >
+                      X
+                    </Button> */}
+                  </span>
+                ))}
+
+                <Button
+                  title="Add UI Elements"
+                  variant="outline"
+                  size="sm"
+                  className="px-2 py-0 h-6 rounded-full text-xs font-medium bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  onClick={() =>
+                    addUiElement({
+                      promotionId: promotion.id,
+                      promotionKey: promotion.key,
+                    })
+                  }
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
               <div>
                 <h4 className="text-sm font-medium mb-2">
                   Associated Products
@@ -192,23 +187,24 @@ export function PromotionRow({
                         <p className="font-medium">
                           {getProductName(pkg.productId)}
                         </p>
-                        {pkg.ui_elements.length > 0 && (
+                        {pkg.uiElements.length > 0 && (
                           <div className="mt-1 flex flex-wrap gap-1">
-                            {pkg.ui_elements.map(({ key }) => (
+                            {pkg.uiElements.map((uiElement) => (
                               <span
-                                key={key}
+                                key={uiElement.key}
                                 className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700"
                               >
-                                {key}
+                                {uiElement.key}
                               </span>
                             ))}
 
                             <Button
+                              title="Add UI Elements"
                               variant="outline"
                               size="sm"
                               className="px-2 py-0 h-6 rounded-full text-xs font-medium bg-gray-100 text-gray-700 hover:bg-gray-200"
                               onClick={() =>
-                                onConfigureUI({
+                                addUiElement({
                                   promotionId: promotion.id,
                                   promotionKey: promotion.key,
                                   productId: pkg.productId,
@@ -221,14 +217,15 @@ export function PromotionRow({
                             </Button>
                           </div>
                         )}
-                        {pkg.ui_elements.length === 0 && (
+                        {pkg.uiElements?.length === 0 && (
                           <div className="mt-1">
                             <Button
+                              title="Add UI Elements"
                               variant="outline"
                               size="sm"
                               className="px-2 py-0 h-6 rounded-full text-xs font-medium bg-gray-100 text-gray-700 hover:bg-gray-200"
                               onClick={() =>
-                                onConfigureUI({
+                                addUiElement({
                                   promotionId: promotion.id,
                                   promotionKey: promotion.key,
                                   productId: pkg.productId,
