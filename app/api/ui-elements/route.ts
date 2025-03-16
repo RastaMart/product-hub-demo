@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
           promotionId,
         },
       });
-      console.log("uiElement", uiElement);
+
       // Associate with the appropriate product type
       let association;
       if (promoXproductID) {

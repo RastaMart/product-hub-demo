@@ -709,6 +709,7 @@ export default function PromotionsPage() {
         isOpen={isUIElementOpen}
         onOpenChange={setIsUIElementOpen}
         onAddUIElement={handleAddUIElement}
+        uiElementKeyTypes={}
       />
     </div>
   );

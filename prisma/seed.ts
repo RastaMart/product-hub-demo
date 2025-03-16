@@ -190,7 +190,7 @@ const voiceProducts = [
   },
 ];
 
-const uiElementTypes = [
+const uiElementKeyTypes = [
   {
     key: "package-header",
     description: "package_header of the product in the check avail module",
@@ -402,6 +402,7 @@ async function main() {
     prisma.promotionProductTV.deleteMany(),
     prisma.promotionProductInternet.deleteMany(),
     prisma.uIElement.deleteMany(),
+    prisma.uIElementKeyType.deleteMany(),
     prisma.equipment.deleteMany(),
     prisma.voiceProduct.deleteMany(),
     prisma.tVProduct.deleteMany(),
@@ -461,6 +462,18 @@ async function main() {
     });
   }
   console.log("✓ Voice products seeded");
+
+  // Seed UI elements and promotions
+  for (const uiElementKeyType of uiElementKeyTypes) {
+    await prisma.uIElementKeyType.create({
+      data: {
+        key: uiElementKeyType.key,
+        description: uiElementKeyType.description,
+        kind: uiElementKeyType.kind,
+      },
+    });
+  }
+  console.log("✓ UI element key types seeded");
 
   // Seed UI elements and promotions
   for (const promotion of promotions) {

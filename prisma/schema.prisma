@@ -122,6 +122,15 @@ model UIElement {
   @@map("ui_elements")
 }
 
+model UIElementKeyType {
+  id          Int    @id @default(autoincrement())
+  key         String @unique
+  description String
+  kind        String @default("text") // Accepts "text" or "image"
+
+  @@map("ui_element_key_types")
+}
+
 model PromotionProductInternet {
   id          Int      @id @default(autoincrement())
   promotionId Int      @map("promotion_id")

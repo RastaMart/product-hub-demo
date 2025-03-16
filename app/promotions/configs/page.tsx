@@ -2,7 +2,6 @@
 export const dynamic = "force-dynamic";
 
 import { useState } from "react";
-import { UIKeyDefinition } from "@/lib/models/ui_elementType";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -30,23 +29,25 @@ import {
 import { Plus, Trash2 } from "lucide-react";
 import { useData } from "@/lib/hooks/use-data";
 import { useToast } from "@/hooks/use-toast";
+import { UIElementKeyType } from "@/lib/models/ui-element-key-type";
 
 export default function ConfigsPage() {
-  const { data: elements = [], loading } =
-    useData<UIKeyDefinition>("/api/ui-elements");
+  const { data: uiElementKeyTypes = [], loading } = useData<UIElementKeyType>(
+    "/api/ui-elements/keyTypes"
+  );
   const [isOpen, setIsOpen] = useState(false);
-  const [newElement, setNewElement] = useState<Partial<UIKeyDefinition>>({
-    type: "text",
+  const [newElement, setNewElement] = useState<Partial<UIElementKeyType>>({
+    kind: "text",
   });
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleCreateElement = async () => {
-    if (!newElement.key || !newElement.description || !newElement.type) return;
+    if (!newElement.key || !newElement.description || !newElement.kind) return;
 
     setIsSubmitting(true);
     try {
-      const response = await fetch("/api/ui-elements", {
+      const response = await fetch("/api/ui-elements/keyType", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -89,12 +90,12 @@ export default function ConfigsPage() {
 
   const handleRemoveElement = async (key: string) => {
     try {
-      const response = await fetch(`/api/ui-elements/${key}`, {
+      const response = await fetch(`/api/ui-elements/keyTypes/${key}`, {
         method: "DELETE",
       });
 
       if (!response.ok) {
-        throw new Error("Failed to delete UI element");
+        throw new Error("Failed to delete UI element key type");
       }
 
       // Show success toast
@@ -161,9 +162,9 @@ export default function ConfigsPage() {
               <div className="space-y-2">
                 <label className="text-sm font-medium">Type</label>
                 <Select
-                  value={newElement.type}
+                  value={newElement.kind}
                   onValueChange={(value: "text" | "image") =>
-                    setNewElement({ ...newElement, type: value })
+                    setNewElement({ ...newElement, kind: value })
                   }
                 >
                   <SelectTrigger>
@@ -195,31 +196,31 @@ export default function ConfigsPage() {
             <TableRow>
               <TableHead>Key</TableHead>
               <TableHead>Description</TableHead>
-              <TableHead>Type</TableHead>
+              <TableHead>Kind</TableHead>
               <TableHead className="w-8"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {elements.map((element) => (
-              <TableRow key={element.key}>
-                <TableCell className="font-medium">{element.key}</TableCell>
-                <TableCell>{element.description}</TableCell>
+            {uiElementKeyTypes.map((keyType) => (
+              <TableRow key={keyType.key}>
+                <TableCell className="font-medium">{keyType.key}</TableCell>
+                <TableCell>{keyType.description}</TableCell>
                 <TableCell>
                   <span
                     className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      element.type === "text"
+                      keyType.kind === "text"
                         ? "bg-blue-100 text-blue-700"
                         : "bg-purple-100 text-purple-700"
                     }`}
                   >
-                    {element.type}
+                    {keyType.kind}
                   </span>
                 </TableCell>
                 <TableCell>
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => handleRemoveElement(element.key)}
+                    onClick={() => handleRemoveElement(keyType.key)}
                     className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
                   >
                     <Trash2 className="h-4 w-4" />

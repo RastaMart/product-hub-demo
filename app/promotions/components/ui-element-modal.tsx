@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { UIKeyDefinition, uiKeyList } from "@/lib/models/ui-keys";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -19,7 +18,8 @@ import {
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useData } from "@/lib/hooks/use-data";
-import { UIElement, UIElementType } from "@/lib/models/ui-element";
+import { UIElement } from "@/lib/models/ui-element";
+import { UIElementKeyType } from "@/lib/models/ui-element-key-type";
 
 interface UIElementModalProps {
   isOpen: boolean;
@@ -32,6 +32,9 @@ export function UIElementModal({
   onOpenChange,
   onAddUIElement,
 }: UIElementModalProps) {
+  const { data: uiElementKeyTypes = [] } = useData<UIElementKeyType>(
+    "/api/ui-elements/keyTypes"
+  );
   const [newUIElement, setNewUIElement] = useState<Partial<UIElement>>({
     key: "",
     txt_text: "",
@@ -39,12 +42,12 @@ export function UIElementModal({
     img_mobileImgUrl: "",
     img_alt: "",
   });
-  const [selectedKeyDefinition, setSelectedKeyDefinition] =
-    useState<UIKeyDefinition | null>(null);
+  const [selectedKeyType, setSelectedKeyType] =
+    useState<UIElementKeyType | null>(null);
 
   const handleKeySelection = (key: string) => {
-    const keyDef = uiKeyList.find((k) => k.key === key);
-    setSelectedKeyDefinition(keyDef || null);
+    const keyDef = uiElementKeyTypes.find((k) => k.key === key);
+    setSelectedKeyType(keyDef || null);
     setNewUIElement({
       ...newUIElement,
       key,
@@ -52,7 +55,7 @@ export function UIElementModal({
       img_desktopImgUrl: "",
       img_mobileImgUrl: "",
       img_alt: "",
-      kind: keyDef?.type,
+      kind: keyDef?.kind,
     });
   };
 
@@ -70,7 +73,7 @@ export function UIElementModal({
       img_mobileImgUrl: "",
       img_alt: "",
     });
-    setSelectedKeyDefinition(null);
+    setSelectedKeyType(null);
   };
 
   return (
@@ -93,7 +96,7 @@ export function UIElementModal({
                       <SelectValue placeholder="Select a key" />
                     </SelectTrigger>
                     <SelectContent>
-                      {uiKeyList.map((keyDef) => (
+                      {uiElementKeyTypes.map((keyDef) => (
                         <SelectItem key={keyDef.key} value={keyDef.key}>
                           <div className="space-y-1">
                             <div>{keyDef.key}</div>
@@ -107,9 +110,9 @@ export function UIElementModal({
                   </Select>
                 </div>
 
-                {selectedKeyDefinition && (
+                {selectedKeyType && (
                   <div className="space-y-4">
-                    {selectedKeyDefinition.type === "text" && (
+                    {selectedKeyType.kind === "text" && (
                       <div className="space-y-2">
                         <label className="text-sm font-medium">
                           Text Content
@@ -127,7 +130,7 @@ export function UIElementModal({
                       </div>
                     )}
 
-                    {selectedKeyDefinition.type === "image" && (
+                    {selectedKeyType.kind === "image" && (
                       <>
                         <div className="space-y-2">
                           <label className="text-sm font-medium">
@@ -183,9 +186,9 @@ export function UIElementModal({
                   onClick={handleAddUIElement}
                   disabled={
                     !newUIElement.key ||
-                    (selectedKeyDefinition?.type === "text" &&
+                    (selectedKeyType?.kind === "text" &&
                       !newUIElement.txt_text) ||
-                    (selectedKeyDefinition?.type === "image" &&
+                    (selectedKeyType?.kind === "image" &&
                       !newUIElement.img_desktopImgUrl)
                   }
                   className="w-full bg-[#1a237e] hover:bg-[#1a237e]/90"
